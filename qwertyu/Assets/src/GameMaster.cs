@@ -96,6 +96,12 @@ public class GameMaster : MonoBehaviour {
             while (0 < index && time < timingPoints[index].ticks) index--;
             return timingPoints[index].GetPositionTickByTime(time);
         }
+
+        public TimingPoint GetTimingPointByBeat(double beat) {
+            int index = timingPoints.Count - 1;
+            while (0 < index && beat < timingPoints[index].beat) index--;
+            return timingPoints[index];
+        }
     }
 
     AnimationCurve ConvertSvgPathToAnimationCurve(string path) {
@@ -323,7 +329,7 @@ public class GameMaster : MonoBehaviour {
                             scoreArgs[0][0],
                             lane,
                             path,
-                            double.Parse(scoreArgs[2]) - speed,
+                            speed,
                             double.Parse(scoreArgs[2]),
                             scoreArgs.Length >= 4 ? longNoteIDs.IndexOf(scoreArgs[3] + lane) : -1,
                             isReversed,
@@ -338,7 +344,7 @@ public class GameMaster : MonoBehaviour {
                             scoreArgs[0][0],
                             lane,
                             path,
-                            double.Parse(scoreArgs[2]) - speed,
+                            speed,
                             double.Parse(scoreArgs[2]),
                             float.Parse(scoreArgs[3]),
                             float.Parse(scoreArgs[4])
@@ -374,7 +380,7 @@ public class GameMaster : MonoBehaviour {
                         Convert.ToChar(i[2]),
                         curves[Convert.ToInt32(i[3])],
                         timingPts.GetHitTickByBeat(Convert.ToDouble(i[5])),
-                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[4])),
+                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5]) - Convert.ToDouble(i[4])),
                         timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5])),
                         Convert.ToInt16(i[6]),
                         Convert.ToBoolean(i[7]),
