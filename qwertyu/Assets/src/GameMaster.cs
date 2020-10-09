@@ -380,7 +380,7 @@ public class GameMaster : MonoBehaviour {
                         Convert.ToChar(i[2]),
                         curves[Convert.ToInt32(i[3])],
                         timingPts.GetHitTickByBeat(Convert.ToDouble(i[5])),
-                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5]) - Convert.ToDouble(i[4])),
+                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5])) - (long)(Convert.ToDouble(i[4]) * 10000000),
                         timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5])),
                         Convert.ToInt16(i[6]),
                         Convert.ToBoolean(i[7]),

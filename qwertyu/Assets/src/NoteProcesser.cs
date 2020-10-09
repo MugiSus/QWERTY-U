@@ -39,5 +39,9 @@ public class NoteProcesser : MonoBehaviour {
         if (alpha < 0 || alpha > 1) alpha = 0;
         mpb.SetColor("_Color", new Color(1f, 1f, 1f, alpha));
         timingSupportSR.SetPropertyBlock(mpb);
+
+        if (hit <= GameMaster.gameMasterTime) mpb.SetColor("_Color", new Color(1, 1, 1, 0));
+        else mpb.SetColor("_Color", new Color(1, 1, 1, 1));
+        noteSR.SetPropertyBlock(mpb);
     }
 }
