@@ -68,39 +68,36 @@ public class GameMaster : MonoBehaviour {
         }
 
         public void AddBPMPoint(double beat, double bpm) {
-            int index = timingPoints.Count - 1;
-            while (0 < index && beat < timingPoints[index].beat) index--;
-            timingPoints.Insert(index + 1, new TimingPoint(this.GetHitTickByBeat(beat), this.GetPositionTickByBeat(beat), beat, bpm, timingPoints[index].scroll));
+            TimingPoint lastTP = timingPoints[timingPoints.Count - 1];
+            timingPoints.Add(new TimingPoint(lastTP.GetHitTickByBeat(beat), lastTP.GetPositionTickByBeat(beat), beat, bpm, lastTP.scroll));
         }
 
         public void AddScrollPoint(double beat, double scroll) {
-            int index = timingPoints.Count - 1;
-            while (0 < index && beat < timingPoints[index].beat) index--;
-            timingPoints.Insert(index + 1, new TimingPoint(this.GetHitTickByBeat(beat), this.GetPositionTickByBeat(beat), beat, timingPoints[index].bpm, scroll));
+            TimingPoint lastTP = timingPoints[timingPoints.Count - 1];
+            timingPoints.Add(new TimingPoint(lastTP.GetHitTickByBeat(beat), lastTP.GetPositionTickByBeat(beat), beat, lastTP.bpm, scroll));
+        }
+
+        public void AddJumpPoint(double beat, double jump) {
+            TimingPoint lastTP = timingPoints[timingPoints.Count - 1];
+            timingPoints.Add(new TimingPoint(lastTP.GetHitTickByBeat(beat), lastTP.GetPositionTickByBeat(beat + jump), beat, lastTP.bpm, lastTP.scroll));
         }
 
         public long GetHitTickByBeat(double beat) {
             int index = timingPoints.Count - 1;
-            while (0 < index && beat < timingPoints[index].beat) index--;
+            while (0 < index && beat <= timingPoints[index].beat) index--;
             return timingPoints[index].GetHitTickByBeat(beat);
         }
 
         public long GetPositionTickByBeat(double beat) {
             int index = timingPoints.Count - 1;
-            while (0 < index && beat < timingPoints[index].beat) index--;
+            while (0 < index && beat <= timingPoints[index].beat) index--;
             return timingPoints[index].GetPositionTickByBeat(beat);
         }
 
         public long GetPositionTickByTime(long time) {
             int index = timingPoints.Count - 1;
-            while (0 < index && time < timingPoints[index].ticks) index--;
+            while (0 < index && time <= timingPoints[index].ticks) index--;
             return timingPoints[index].GetPositionTickByTime(time);
-        }
-
-        public TimingPoint GetTimingPointByBeat(double beat) {
-            int index = timingPoints.Count - 1;
-            while (0 < index && beat < timingPoints[index].beat) index--;
-            return timingPoints[index];
         }
     }
 
@@ -286,8 +283,6 @@ public class GameMaster : MonoBehaviour {
 
         scoreFullText = Regex.Replace(scoreFullText, @"^//.*?$", "", RegexOptions.Multiline);
 
-        Debug.Log(scoreFullText);
-
         scoreTextData["title"] = Regex.Matches(scoreFullText, @"title:(.*)")[0].Groups[1].Value;
         scoreTextData["author"] = Regex.Matches(scoreFullText, @"author:(.*)")[0].Groups[1].Value;
         scoreTextData["bgm"] = Regex.Matches(scoreFullText, @"bgm:(.*)")[0].Groups[1].Value;
@@ -298,6 +293,14 @@ public class GameMaster : MonoBehaviour {
 
         scoreTextData["path"] = Regex.Matches(scoreFullText, @"path:(.*?)score:", RegexOptions.Singleline)[0].Groups[1].Value;
         scoreTextData["score"] = Regex.Matches(scoreFullText, @"score:(.*)", RegexOptions.Singleline)[0].Groups[1].Value;
+
+        CreateLane('1', -120, -70, 0, 1, 1);
+        CreateLane('2', -80, -70, 0, 1, 2);
+        CreateLane('3', -40, -70, 0, 1, 3);
+        CreateLane('4', 0, -70, 0, 1, 4);
+        CreateLane('5', 40, -70, 0, 1, 5);
+        CreateLane('6', 80, -70, 0, 1, 6);
+        CreateLane('7', 120, -70, 0, 1, 7);
 
         var curvesList = new List<AnimationCurve>();
         var indexOfpathName = new Dictionary<string, int>();
@@ -351,18 +354,21 @@ public class GameMaster : MonoBehaviour {
                         });
                     }
                 } break;
-                case "bpm": {
-                    timingPts.AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
-                } break;
-                case "scroll": {
-                    timingPts.AddScrollPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
-                } break;
                 case "path": {
                     isReversed = scoreArgs[1][0] == '-';
                     path = indexOfpathName[isReversed ? scoreArgs[1].Substring(1) : scoreArgs[1]];
                 } break;
                 case "speed": {
                     speed = double.Parse(scoreArgs[1]);
+                } break;
+                case "bpm": {
+                    timingPts.AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
+                } break;
+                case "scroll": {
+                    timingPts.AddScrollPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                } break;
+                case "jump": {
+                    timingPts.AddJumpPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
                 } break;
             }
         }
@@ -374,7 +380,6 @@ public class GameMaster : MonoBehaviour {
         foreach (var i in primaryProcessedScore) {
             switch(i[0]) {
                 case 1: {
-                    Debug.Log($"{i[1]} {i[2]} {i[3]} {i[4]} {i[5]}");
                     CreateNote(
                         Convert.ToChar(i[1]),
                         Convert.ToChar(i[2]),
@@ -392,19 +397,11 @@ public class GameMaster : MonoBehaviour {
                 } break;
             }
         }
-
+        
         gameStartedTime = DateTime.Now.Ticks + 20000000;
     }
 
     void Start() {
-
-        CreateLane('1', -120, -70, -15, 1, 1);
-        CreateLane('2', -80, -70, -10, 1, 2);
-        CreateLane('3', -40, -70, -5, 1, 3);
-        CreateLane('4', 0, -70, 0, 1, 4);
-        CreateLane('5', 40, -70, 5, 1, 5);
-        CreateLane('6', 80, -70, 10, 1, 6);
-        CreateLane('7', 120, -70, 15, 1, 7);
 
         LoadScore("bpm_rt");
 

@@ -36,11 +36,12 @@ public class NoteProcesser : MonoBehaviour {
         transform.GetChild(0).localScale = new Vector3(scale, scale, 1);
 
         float alpha = 1 - (hit - GameMaster.gameMasterTime) / 30000000f;
-        if (alpha < 0 || alpha > 1) alpha = 0;
+        
+        if (alpha < 0 || alpha > 1 || time < 0 || time > 1) alpha = 0;
         mpb.SetColor("_Color", new Color(1f, 1f, 1f, alpha));
         timingSupportSR.SetPropertyBlock(mpb);
 
-        if (hit <= GameMaster.gameMasterTime) mpb.SetColor("_Color", new Color(1, 1, 1, 0));
+        if (time < 0 || time > 1) mpb.SetColor("_Color", new Color(1, 1, 1, 0));
         else mpb.SetColor("_Color", new Color(1, 1, 1, 1));
         noteSR.SetPropertyBlock(mpb);
     }

@@ -14,17 +14,26 @@ path:
 
 score:
 
-(path 1)(speed 6)
+(path 1)(speed 5)
 (1 2 -1)
+(jump ~ -0.5 1)
 (1 3 -0.5)
-(scroll 0 2)
+(scroll ~ 0 2)
 (1 4 0)
 (1 6 1)
 (1 5 2)
-(scroll 3 -1)
+(scroll ~ 3 -1)
 (1 4 3)
-(scroll 4 1)
+(scroll ~ 4 1)
 (1 3 5)
 (1 2 6)
+(bpm 6 60)
 (1 3 7)
+(bpm 7 400)
 (1 6 9)
+
+(path 2)
+(1 4 20)
+(scroll ~ 10 -1)
+(scroll ~ 15 1)
+
