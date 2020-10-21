@@ -24,6 +24,8 @@ public class GameMaster : MonoBehaviour {
     public static long gameMasterTime;
     public static long gameMasterPosition;
 
+    MusicPlayer musicPlayer;
+
     int noteNum;
     Dictionary<char, sbyte> keyNumsOfLanes = new Dictionary<char, sbyte>();
     Dictionary<char, GameObject> lanesDictionary = new Dictionary<char, GameObject>();
@@ -302,6 +304,8 @@ public class GameMaster : MonoBehaviour {
         CreateLane('6', 80, -70, 0, 1, 6);
         CreateLane('7', 120, -70, 0, 1, 7);
 
+        musicPlayer = new MusicPlayer(scoreTextData["bgm"]);
+
         var curvesList = new List<AnimationCurve>();
         var indexOfpathName = new Dictionary<string, int>();
         foreach (var pathString in scoreTextData["path"].Split('\n')) {
@@ -404,6 +408,7 @@ public class GameMaster : MonoBehaviour {
     void Start() {
 
         LoadScore("bpm_rt");
+        musicPlayer.playMusic();
 
         noteNum = 0;
     }
