@@ -3,8 +3,9 @@ ScriptsOnlyBuild:
     Assembly-CSharp.dll:
     - GameMaster
     - InfoMover
+    - LaneMoverProcesser
+    - LaneProcesser
     - NoteProcesser
-    - positionHolder
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -40,13 +41,15 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 12702}
+      Script: {instanceID: 12852}
     - Class: 114
-      Script: {instanceID: 12856}
+      Script: {instanceID: 13686}
     - Class: 114
-      Script: {instanceID: 13690}
+      Script: {instanceID: 13760}
     - Class: 114
-      Script: {instanceID: 13764}
+      Script: {instanceID: 15752}
+    - Class: 114
+      Script: {instanceID: 16198}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -272,12 +275,6 @@ ScriptsOnlyBuild:
     className: ScrollRect
   - hash:
       serializedVersion: 2
-      Hash: 505b1ca76890efbecb36fba121577dda
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: positionHolder
-  - hash:
-      serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -296,7 +293,7 @@ ScriptsOnlyBuild:
     className: RemoteTestResultSender
   - hash:
       serializedVersion: 2
-      Hash: adf5cb1890d48460dda3ec21686ba686
+      Hash: 40c3bcc6e6d12a38a8d10edc842ee420
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: NoteProcesser
@@ -410,7 +407,7 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
-      Hash: 595db986a50a594665ab3003a0e1e446
+      Hash: eb4b0bea689b17179687e47c4fe4b34d
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameMaster
@@ -522,6 +519,18 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
+  - hash:
+      serializedVersion: 2
+      Hash: a34c85c680814096af16887dd40ce211
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: LaneProcesser
+  - hash:
+      serializedVersion: 2
+      Hash: 408a9e9b3550cca08f40937fb445218f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: LaneMoverProcesser
   platform: 5
   scenePathNames:
   - Assets/Scenes/game.unity

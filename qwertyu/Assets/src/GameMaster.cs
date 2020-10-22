@@ -8,6 +8,7 @@ public class GameMaster : MonoBehaviour {
 
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
     [SerializeField] GameObject noteGameObject;
+    [SerializeField] GameObject laneMoverGameObject;
 
     [SerializeField, HeaderAttribute("Note Sprites")] Sprite[] lanelatterSprites;
     [SerializeField] Sprite[] tapnoteSprites;
@@ -19,17 +20,20 @@ public class GameMaster : MonoBehaviour {
     [SerializeField] Sprite slidenoteTimingMultiSupport;
 
     [SerializeField] AnimationCurve[] curves;
-
+    
     long gameStartedTime;
     public static long gameMasterTime;
-    public static long gameMasterPosition;
+    public static Dictionary<char, long> gameMasterPositions = new Dictionary<char, long>();
 
     int noteNum;
+    int laneMoverNum;
+
+    string allLaneIDString;
     Dictionary<char, sbyte> keyNumsOfLanes = new Dictionary<char, sbyte>();
     Dictionary<char, GameObject> lanesDictionary = new Dictionary<char, GameObject>();
     Dictionary<string, string> scoreTextData = new Dictionary<string, string>();
 
-    TimingPoints timingPts;
+    Dictionary<char, TimingPoints> timingPtsDic = new Dictionary<char, TimingPoints>();
 
     class TimingPoints {
         
@@ -98,6 +102,46 @@ public class GameMaster : MonoBehaviour {
             int index = timingPoints.Count - 1;
             while (0 < index && time <= timingPoints[index].ticks) index--;
             return timingPoints[index].GetPositionTickByTime(time);
+        }
+    }
+
+    class NoteDataHolder {
+        public char type;
+        public char lane;
+        public double beat;
+        public short longNoteID;
+        public double speed;
+        public AnimationCurve[] curve;
+        public bool isReversed;
+
+        public NoteDataHolder(char type, char lane, double beat, short longNoteID, double speed, AnimationCurve[] curve, bool isReversed) {
+            this.type = type;
+            this.lane = lane;
+            this.beat = beat;
+            this.longNoteID = longNoteID;
+            this.speed = speed;
+            this.curve = curve;
+            this.isReversed = isReversed;
+        }
+    }
+
+    class laneMoverDataHolder {
+        public char type;
+        public char lane;
+        public double beat;
+        public double speed;
+        public AnimationCurve[] curve;
+        public float fromValue;
+        public float toValue;
+
+        public laneMoverDataHolder(char type, char lane, double beat, double speed, AnimationCurve[] curve, float fromValue, float toValue) {
+            this.type = type;
+            this.lane = lane;
+            this.beat = beat;
+            this.speed = speed;
+            this.curve = curve;
+            this.fromValue = fromValue;
+            this.toValue = toValue;
         }
     }
 
@@ -231,8 +275,12 @@ public class GameMaster : MonoBehaviour {
     }
 
     void CreateLane(char lane, float xpos, float ypos, float direction, float alpha, sbyte keyNum) {
+        
         GameObject tempLane = Instantiate(laneGameObject);
 
+        allLaneIDString += lane;
+        gameMasterPositions.Add(lane, 0);
+        timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1.0d));
         lanesDictionary.Add(lane, tempLane);
         keyNumsOfLanes.Add(lane, keyNum);
 
@@ -245,39 +293,64 @@ public class GameMaster : MonoBehaviour {
         tempLane.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = lanelatterSprites[keyNum];
     }
     
-    void CreateNote(char type, char lane, AnimationCurve curve, long hit, long appearPosition, long hitPosition, short longNoteID, bool isReversed, bool isMultiNote) {
+    void CreateNote(char type, char lane, AnimationCurve[] curve, long hit, long appearPosition, long hitPosition, short longNoteID, bool isReversed, bool isMultiNote) {
 
         GameObject tempNote = Instantiate(noteGameObject);
 
         tempNote.transform.parent = lanesDictionary[lane].transform;
         tempNote.name = "note_" + noteNum++;
 
-        if (type == '1' || type == '3') tempNote.gameObject.GetComponent<SpriteRenderer>().sprite = tapnoteSprites[keyNumsOfLanes[lane]];
-        else tempNote.gameObject.GetComponent<SpriteRenderer>().sprite = slidenoteSprites[keyNumsOfLanes[lane]];
+        SpriteRenderer tempSR;
+        tempSR = tempNote.gameObject.GetComponent<SpriteRenderer>();
+        if (type == '1' || type == '3') tempSR.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
+        else tempSR.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
 
+        tempSR = tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>();
         if (isMultiNote) {
-            if (type == '1') tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = tapnoteTimingMultiSupport;
-            else if (type == '2') tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = slidenoteTimingMultiSupport;
+            if (type == '1') tempSR.sprite = tapnoteTimingMultiSupport;
+            else if (type == '2') tempSR.sprite = slidenoteTimingMultiSupport;
         } else {
-            if (type == '1') tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = tapnoteTimingSupport;
-            else if (type == '2') tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = slidenoteTimingSupport;
+            if (type == '1') tempSR.sprite = tapnoteTimingSupport;
+            else if (type == '2') tempSR.sprite = slidenoteTimingSupport;
         }
 
-        var tempNoteManager = tempNote.gameObject.GetComponent<NoteProcesser>();
+        var tempNoteProcesser = tempNote.gameObject.GetComponent<NoteProcesser>();
 
-        tempNoteManager.type = type;
-        tempNoteManager.lane = lane;
-        tempNoteManager.keyNum = keyNumsOfLanes[lane]; //Additional
-        tempNoteManager.curve = curve;
-        tempNoteManager.hit = hit;
-        tempNoteManager.appearPosition = appearPosition;
-        tempNoteManager.hitPosition = hitPosition;
-        tempNoteManager.longNoteID = longNoteID;
-        tempNoteManager.isReversed = isReversed;
-        tempNoteManager.isMultiNote = isMultiNote;
+        tempNoteProcesser.type = type;
+        tempNoteProcesser.lane = lane;
+        tempNoteProcesser.keyNum = keyNumsOfLanes[lane]; //Additional
+        tempNoteProcesser.curve = curve;
+        tempNoteProcesser.hit = hit;
+        tempNoteProcesser.appearPosition = appearPosition;
+        tempNoteProcesser.hitPosition = hitPosition;
+        tempNoteProcesser.longNoteID = longNoteID;
+        tempNoteProcesser.isReversed = isReversed;
+        tempNoteProcesser.isMultiNote = isMultiNote;
+    }
+
+    void CreateLaneMover(char type, char lane, AnimationCurve[] curve, long hit, long appearPosition, long hitPosition, float fromValue, float toValue) {
+        GameObject tempLaneMover = Instantiate(laneMoverGameObject);
+
+        tempLaneMover.transform.parent = lanesDictionary[lane].transform;
+        tempLaneMover.name = "laneMover_" + laneMoverNum++;
+
+        var tempLaneMoverProcesser = tempLaneMover.gameObject.GetComponent<LaneMoverProcesser>();
+
+        tempLaneMoverProcesser.type = type;
+        tempLaneMoverProcesser.lane = lane;
+        tempLaneMoverProcesser.curve = curve;
+        tempLaneMoverProcesser.hit = hit;
+        tempLaneMoverProcesser.appearPosition = appearPosition;
+        tempLaneMoverProcesser.hitPosition = hitPosition;
+        tempLaneMoverProcesser.fromValue = fromValue;
+        tempLaneMoverProcesser.toValue = toValue;
     }
 
     void LoadScore(string scoreFileName) {
+
+        noteNum = 0;
+        laneMoverNum = 0;
+        allLaneIDString = "";
         
         string scoreFullText = ((TextAsset)Resources.Load("scores/" + scoreFileName + "/" + scoreFileName + ".qwertyuscore")).text;
 
@@ -288,7 +361,6 @@ public class GameMaster : MonoBehaviour {
         scoreTextData["bgm"] = Regex.Matches(scoreFullText, @"bgm:(.*)")[0].Groups[1].Value;
         scoreTextData["bgmvol"] = Regex.Matches(scoreFullText, @"bgmvol:(.*)")[0].Groups[1].Value;
         scoreTextData["bpm"] = Regex.Matches(scoreFullText, @"bpm:(.*)")[0].Groups[1].Value;
-        scoreTextData["scroll"] = Regex.Matches(scoreFullText, @"scroll:(.*)")[0].Groups[1].Value;
         scoreTextData["offset"] = Regex.Matches(scoreFullText, @"offset:(.*)")[0].Groups[1].Value;
 
         scoreTextData["path"] = Regex.Matches(scoreFullText, @"path:(.*?)score:", RegexOptions.Singleline)[0].Groups[1].Value;
@@ -313,104 +385,120 @@ public class GameMaster : MonoBehaviour {
         }
         curves = curvesList.ToArray();
 
-        timingPts = new TimingPoints(double.Parse(scoreTextData["bpm"]), double.Parse(scoreTextData["scroll"]));
-
         var longNoteIDs = new List<string>();
-        var primaryProcessedScore = new List<object[]>();
+        var noteDataHolders = new List<NoteDataHolder>();
+        var laneMoverDataHolders = new List<laneMoverDataHolder>();
         double speed = 4;
-        int path = 0;
+        AnimationCurve[] curve = new AnimationCurve[] {curves[0]};
         bool isReversed = false;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
             string[] scoreArgs = individualMatch.Groups[1].Value.Split(' ');
+            if (scoreArgs[1][0] == '~') scoreArgs[1] = allLaneIDString;
             switch (scoreArgs[0]) {
                 case "1": case "2": case "3": case "4": {
                     foreach (char lane in scoreArgs[1]) {
                         if (scoreArgs.Length >= 4 && longNoteIDs.IndexOf(scoreArgs[3] + lane) == -1) longNoteIDs.Add(scoreArgs[3] + lane);
-                        primaryProcessedScore.Add(new object[] {
-                            1,
+                        noteDataHolders.Add(new NoteDataHolder(
                             scoreArgs[0][0],
                             lane,
-                            path,
-                            speed,
                             double.Parse(scoreArgs[2]),
-                            scoreArgs.Length >= 4 ? longNoteIDs.IndexOf(scoreArgs[3] + lane) : -1,
-                            isReversed,
-                            scoreArgs[1].Length >= 2
-                        });
+                            (short)(scoreArgs.Length >= 4 ? longNoteIDs.IndexOf(scoreArgs[3] + lane) : -1),
+                            speed,
+                            curve,
+                            isReversed
+                        ));
                     }
                 } break;
-                case "a": case "d": case "x": case "y": {
+                case "a": case "x": case "y": case "z": case "dx": case "dy": case "dz": {
+                    if (scoreArgs[0][0] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 3);
                     foreach (char lane in scoreArgs[1]) {
-                        primaryProcessedScore.Add(new object[] {
-                            2,
+                        laneMoverDataHolders.Add(new laneMoverDataHolder(
                             scoreArgs[0][0],
                             lane,
-                            path,
-                            speed,
                             double.Parse(scoreArgs[2]),
+                            speed,
+                            curve,
                             float.Parse(scoreArgs[3]),
                             float.Parse(scoreArgs[4])
-                        });
+                        ));
                     }
                 } break;
                 case "path": {
-                    isReversed = scoreArgs[1][0] == '-';
-                    path = indexOfpathName[isReversed ? scoreArgs[1].Substring(1) : scoreArgs[1]];
+                    if (scoreArgs[1][0] == '-') {
+                        isReversed = true;
+                        scoreArgs[1] = scoreArgs[1].Substring(1);
+                    } else isReversed = false;
+                    var tempCurves = new List<AnimationCurve>();
+                    foreach (var pathName in scoreArgs[1].Split(',')) {
+                        tempCurves.Add(curves[indexOfpathName[pathName]]);
+                    }
+                    curve = tempCurves.ToArray();
                 } break;
                 case "speed": {
                     speed = double.Parse(scoreArgs[1]);
                 } break;
                 case "bpm": {
-                    timingPts.AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
+                    foreach (char lane in allLaneIDString) {
+                        timingPtsDic[lane].AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
+                    }
                 } break;
                 case "scroll": {
-                    timingPts.AddScrollPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                    foreach (char lane in scoreArgs[1]) {
+                        timingPtsDic[lane].AddScrollPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                    }
                 } break;
                 case "jump": {
-                    timingPts.AddJumpPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                    foreach (char lane in scoreArgs[1]) {
+                        timingPtsDic[lane].AddJumpPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                    }
                 } break;
             }
         }
 
-        primaryProcessedScore.Sort((x, y) => (double)x[4] > (double)y[4] ? 1 : (double)x[4] < (double)y[4] ? -1 : 0);
+        noteDataHolders.Sort((x, y) => x.beat > y.beat ? 1 : x.beat < y.beat ? -1 : 0);
 
-        var processedScore = new List<object[]>();
+        for (int index = 0; index < noteDataHolders.Count; index++) {
+            NoteDataHolder item = noteDataHolders[index];
+            CreateNote(
+                item.type,
+                item.lane,
+                item.curve,
+                timingPtsDic[item.lane].GetHitTickByBeat(item.beat),
+                timingPtsDic[item.lane].GetPositionTickByBeat(item.beat) - (long)(item.speed * 10000000),
+                timingPtsDic[item.lane].GetPositionTickByBeat(item.beat),
+                item.longNoteID,
+                item.isReversed,
+                (index > 0 && item.beat == noteDataHolders[index - 1].beat) || (index < noteDataHolders.Count - 1 && item.beat == noteDataHolders[index + 1].beat)
+            );
+        }
 
-        foreach (var i in primaryProcessedScore) {
-            switch(i[0]) {
-                case 1: {
-                    CreateNote(
-                        Convert.ToChar(i[1]),
-                        Convert.ToChar(i[2]),
-                        curves[Convert.ToInt32(i[3])],
-                        timingPts.GetHitTickByBeat(Convert.ToDouble(i[5])),
-                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5])) - (long)(Convert.ToDouble(i[4]) * 10000000),
-                        timingPts.GetPositionTickByBeat(Convert.ToDouble(i[5])),
-                        Convert.ToInt16(i[6]),
-                        Convert.ToBoolean(i[7]),
-                        Convert.ToBoolean(i[8])
-                    );
-                } break;
-                case 2: {
-
-                } break;
-            }
+        foreach (var item in laneMoverDataHolders) {
+            CreateLaneMover(
+                item.type,
+                item.lane,
+                item.curve,
+                timingPtsDic[item.lane].GetHitTickByBeat(item.beat),
+                timingPtsDic[item.lane].GetPositionTickByBeat(item.beat) - (long)(item.speed * 10000000),
+                timingPtsDic[item.lane].GetPositionTickByBeat(item.beat),
+                item.fromValue,
+                item.toValue
+            );
         }
         
         gameStartedTime = DateTime.Now.Ticks + 20000000;
     }
 
     void Start() {
-
         LoadScore("bpm_rt");
-
-        noteNum = 0;
     }
 
     void Update() {
         if (Input.GetKey(KeyCode.Space)) gameStartedTime = DateTime.Now.Ticks + 20000000;
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
-        gameMasterPosition = timingPts.GetPositionTickByTime(gameMasterTime);
+        foreach (char lane in allLaneIDString) {
+            lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);
+        }
+        if (Input.GetKey(KeyCode.Escape)) UnityEngine.Application.Quit();
     }
 }
