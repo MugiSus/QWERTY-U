@@ -12,45 +12,51 @@ public class LaneMoverProcesser : MonoBehaviour {
     public long appearPosition;
     public long hitPosition;
     public AnimationCurve[] curve;
+
+    public bool inProcess = false;
     
     LaneProcesser parentSrcComp;
     SpriteRenderer laneSR;
 
     void Start() {
         parentSrcComp = transform.parent.gameObject.GetComponent<LaneProcesser>();
-        laneSR = transform.parent.GetChild(1).gameObject.GetComponent<SpriteRenderer>();
+        if (type == 'a') laneSR = transform.parent.GetChild(1).gameObject.GetComponent<SpriteRenderer>();
     }
 
     void Update() {
 
         float time = (float)(parentSrcComp.position - appearPosition) / (hitPosition - appearPosition);
 
-        if (time < 0) return;
-        else if (time > 1) return;
+        if (inProcess) {
+            if (time < 0 || time > 1) inProcess = false;
+        } else {
+            if (time >= 0 && time <= 1) inProcess = true;
+            else return;
+        }
         for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
 
         switch (type) {
-            case 'x': case 'y': case 'z': {
+            case 'x': {
                 Vector3 parentPosition = transform.parent.localPosition;
-                switch (type) {
-                    case 'x': parentPosition.x = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                    case 'y': parentPosition.y = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                    case 'z': parentPosition.z = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                }
+                parentPosition.x = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
                 transform.parent.localPosition = parentPosition;
             } break;
-            case 'u': case 'v': case 'w': {
-                Vector3 parentEulerAngles = transform.parent.localEulerAngles;
-                switch (type) {
-                    case 'u': parentEulerAngles.x = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                    case 'v': parentEulerAngles.y = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                    case 'w': parentEulerAngles.z = fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue); break;
-                }
-                transform.parent.localEulerAngles = parentEulerAngles;
+            case 'y': {
+                Vector3 parentPosition = transform.parent.localPosition;
+                parentPosition.y = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
+                transform.parent.localPosition = parentPosition;
+            } break;
+            case 'z': {
+                Vector3 parentPosition = transform.parent.localPosition;
+                parentPosition.z = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
+                transform.parent.localPosition = parentPosition;
+            } break;
+            case 'd': {
+                transform.parent.localEulerAngles = new Vector3(90, Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)), 0);
             } break;
             case 'a': {
                 var mpb = new MaterialPropertyBlock();
-                mpb.SetColor("_Color", new Color(1, 1, 1, fromValue + (1 - curve[0].Evaluate(time)) * (toValue - fromValue)));
+                mpb.SetColor("_Color", new Color(1, 1, 1, Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time))));
                 laneSR.SetPropertyBlock(mpb);
             } break;
         }

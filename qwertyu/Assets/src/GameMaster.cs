@@ -21,7 +21,7 @@ public class GameMaster : MonoBehaviour {
 
     [SerializeField] AnimationCurve[] curves;
     
-    long gameStartedTime;
+    [SerializeField, HeaderAttribute("Times")] public long gameStartedTime;
     public static long gameMasterTime;
     public static Dictionary<char, long> gameMasterPositions = new Dictionary<char, long>();
 
@@ -125,7 +125,7 @@ public class GameMaster : MonoBehaviour {
         }
     }
 
-    class laneMoverDataHolder {
+    class LaneMoverDataHolder {
         public char type;
         public char lane;
         public double beat;
@@ -134,7 +134,7 @@ public class GameMaster : MonoBehaviour {
         public float fromValue;
         public float toValue;
 
-        public laneMoverDataHolder(char type, char lane, double beat, double speed, AnimationCurve[] curve, float fromValue, float toValue) {
+        public LaneMoverDataHolder(char type, char lane, double beat, double speed, AnimationCurve[] curve, float fromValue, float toValue) {
             this.type = type;
             this.lane = lane;
             this.beat = beat;
@@ -348,13 +348,20 @@ public class GameMaster : MonoBehaviour {
 
     void LoadScore(string scoreFileName) {
 
+        gameMasterPositions = new Dictionary<char, long>();
+        keyNumsOfLanes = new Dictionary<char, sbyte>();
+        lanesDictionary = new Dictionary<char, GameObject>();
+        scoreTextData = new Dictionary<string, string>();
+        timingPtsDic = new Dictionary<char, TimingPoints>();
         noteNum = 0;
         laneMoverNum = 0;
         allLaneIDString = "";
+
+        foreach (Transform child in gameObject.transform) GameObject.Destroy(child.gameObject);
         
         string scoreFullText = ((TextAsset)Resources.Load("scores/" + scoreFileName + "/" + scoreFileName + ".qwertyuscore")).text;
 
-        scoreFullText = Regex.Replace(scoreFullText, @"^//.*?$", "", RegexOptions.Multiline);
+        scoreFullText = Regex.Replace(scoreFullText, @"//.*?$", "", RegexOptions.Multiline);
 
         scoreTextData["title"] = Regex.Matches(scoreFullText, @"title:(.*)")[0].Groups[1].Value;
         scoreTextData["author"] = Regex.Matches(scoreFullText, @"author:(.*)")[0].Groups[1].Value;
@@ -387,9 +394,10 @@ public class GameMaster : MonoBehaviour {
 
         var longNoteIDs = new List<string>();
         var noteDataHolders = new List<NoteDataHolder>();
-        var laneMoverDataHolders = new List<laneMoverDataHolder>();
-        double speed = 4;
+        var laneMoverDataHolders = new List<LaneMoverDataHolder>();
+
         AnimationCurve[] curve = new AnimationCurve[] {curves[0]};
+        double speed = 4;
         bool isReversed = false;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
@@ -410,10 +418,9 @@ public class GameMaster : MonoBehaviour {
                         ));
                     }
                 } break;
-                case "a": case "x": case "y": case "z": case "dx": case "dy": case "dz": {
-                    if (scoreArgs[0][0] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 3);
+                case "a": case "d": case "x": case "y": case "z": {
                     foreach (char lane in scoreArgs[1]) {
-                        laneMoverDataHolders.Add(new laneMoverDataHolder(
+                        laneMoverDataHolders.Add(new LaneMoverDataHolder(
                             scoreArgs[0][0],
                             lane,
                             double.Parse(scoreArgs[2]),
@@ -457,6 +464,7 @@ public class GameMaster : MonoBehaviour {
         }
 
         noteDataHolders.Sort((x, y) => x.beat > y.beat ? 1 : x.beat < y.beat ? -1 : 0);
+        laneMoverDataHolders.Sort((x, y) => x.beat > y.beat ? 1 : x.beat < y.beat ? -1 : 0);
 
         for (int index = 0; index < noteDataHolders.Count; index++) {
             NoteDataHolder item = noteDataHolders[index];
@@ -486,7 +494,7 @@ public class GameMaster : MonoBehaviour {
             );
         }
         
-        gameStartedTime = DateTime.Now.Ticks + 20000000;
+        gameStartedTime = DateTime.Now.Ticks + 30000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000);
     }
 
     void Start() {
@@ -494,7 +502,7 @@ public class GameMaster : MonoBehaviour {
     }
 
     void Update() {
-        if (Input.GetKey(KeyCode.Space)) gameStartedTime = DateTime.Now.Ticks + 20000000;
+        if (Input.GetKey(KeyCode.Space)) LoadScore("bpm_rt");
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
         foreach (char lane in allLaneIDString) {
             lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);

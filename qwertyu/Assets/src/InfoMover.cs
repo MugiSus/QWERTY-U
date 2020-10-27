@@ -36,7 +36,7 @@ public class InfoMover : MonoBehaviour {
 
         double nowTickSin = Math.Sin(DateTime.Now.Ticks / 20000000d * Math.PI);
 
-        progress = 0.5d - nowTickSin * 0.5d;
+        progress = 0;
 
         progressbarTransforms[0].position = new Vector3(-160, 0, 15f * (1f - (float)progress));
         progressbarTransforms[1].position = new Vector3(-160, 0, -15f * (float)progress);

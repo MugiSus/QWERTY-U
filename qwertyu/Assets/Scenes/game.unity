@@ -1210,6 +1210,8 @@ MonoBehaviour:
     type: 3}
   noteGameObject: {fileID: 2091095051050051230, guid: 1f18d453a89084c4197f6fd3413b3ca7,
     type: 3}
+  laneMoverGameObject: {fileID: 1054398290478277285, guid: fdc73eda0c68b0f42a2172ec020535b0,
+    type: 3}
   lanelatterSprites:
   - {fileID: 3286163911610860551, guid: fd179679b0f1a614a8845b7838c39766, type: 3}
   - {fileID: 3286163911610860551, guid: 3d546912817bdd5438dcb9e800f2fad9, type: 3}
@@ -1246,6 +1248,7 @@ MonoBehaviour:
   slidenoteTimingMultiSupport: {fileID: 3286163911610860551, guid: a78f9332e74ed0343b7477400bc5c362,
     type: 3}
   curves: []
+  gameStartedTime: 0
 --- !u!4 &1617360542
 Transform:
   m_ObjectHideFlags: 0
