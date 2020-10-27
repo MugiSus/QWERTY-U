@@ -357,7 +357,14 @@ public class GameMaster : MonoBehaviour {
         laneMoverNum = 0;
         allLaneIDString = "";
 
-        foreach (Transform child in gameObject.transform) GameObject.Destroy(child.gameObject);
+        string[] deleteIgnore = new string[] {
+            "MainCamera",
+            "infoes"
+        };
+        foreach (Transform child in gameObject.transform) {
+            if (Array.IndexOf(deleteIgnore, child.name) > -1) continue;
+            GameObject.Destroy(child.gameObject);
+        }
         
         string scoreFullText = ((TextAsset)Resources.Load("scores/" + scoreFileName + "/" + scoreFileName + ".qwertyuscore")).text;
 
@@ -401,7 +408,7 @@ public class GameMaster : MonoBehaviour {
         bool isReversed = false;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
-            string[] scoreArgs = individualMatch.Groups[1].Value.Split(' ');
+            string[] scoreArgs = individualMatch.Groups[1].Value.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
             if (scoreArgs[1][0] == '~') scoreArgs[1] = allLaneIDString;
             switch (scoreArgs[0]) {
                 case "1": case "2": case "3": case "4": {
