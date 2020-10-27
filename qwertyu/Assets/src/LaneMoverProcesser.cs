@@ -38,17 +38,17 @@ public class LaneMoverProcesser : MonoBehaviour {
         switch (type) {
             case 'x': {
                 Vector3 parentPosition = transform.parent.localPosition;
-                parentPosition.x = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
+                parentPosition.x = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time));
                 transform.parent.localPosition = parentPosition;
             } break;
             case 'y': {
                 Vector3 parentPosition = transform.parent.localPosition;
-                parentPosition.y = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
+                parentPosition.y = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time));
                 transform.parent.localPosition = parentPosition;
             } break;
             case 'z': {
                 Vector3 parentPosition = transform.parent.localPosition;
-                parentPosition.z = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time)); break;
+                parentPosition.z = Mathf.Lerp(fromValue, toValue, 1 - curve[0].Evaluate(time));
                 transform.parent.localPosition = parentPosition;
             } break;
             case 'd': {
