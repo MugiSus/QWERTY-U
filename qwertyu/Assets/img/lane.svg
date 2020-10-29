@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -10,11 +8,11 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="300mm"
-   height="20000mm"
-   viewBox="0 0 300 20000"
+   height="40000mm"
+   viewBox="0 0 300 40000"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    sodipodi:docname="lane.svg">
   <defs
      id="defs2" />
@@ -25,9 +23,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.01"
-     inkscape:cx="-6367.7743"
-     inkscape:cy="39263.475"
+     inkscape:zoom="0.64"
+     inkscape:cx="549.17313"
+     inkscape:cy="44833.45"
      inkscape:document-units="mm"
      inkscape:current-layer="svg8"
      showgrid="false"
@@ -37,7 +35,8 @@
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:snap-page="true" />
+     inkscape:snap-page="true"
+     inkscape:document-rotation="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -56,8 +55,8 @@
      id="layer1"
      transform="translate(0,19703)" />
   <path
-     style="opacity:1;fill:#d0d0ff;fill-opacity:0.11640212;fill-rule:nonzero;stroke:none;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 1.5e-6,0 H 300 V 20000 H 1.5e-6 Z"
+     style="opacity:1;fill:#d0d0ff;fill-opacity:0.116402;fill-rule:nonzero;stroke:none;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     d="M 0,0 H 300 V 40000 H 0 Z"
      id="rect10"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc"
@@ -65,13 +64,13 @@
      inkscape:export-ydpi="131.81" />
   <path
      style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 300,20000 V 0"
+     d="M 300,40000 V 0"
      id="path1365"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path
      style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 0,0 V 20000"
+     d="M 0,0 V 40000"
      id="path1369"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />

@@ -113,8 +113,9 @@ public class GameMaster : MonoBehaviour {
         public double speed;
         public AnimationCurve[] curve;
         public bool isReversed;
+        public float positionNotesFrom;
 
-        public NoteDataHolder(char type, char lane, double beat, short longNoteID, double speed, AnimationCurve[] curve, bool isReversed) {
+        public NoteDataHolder(char type, char lane, double beat, short longNoteID, double speed, AnimationCurve[] curve, bool isReversed, float positionNotesFrom) {
             this.type = type;
             this.lane = lane;
             this.beat = beat;
@@ -122,6 +123,7 @@ public class GameMaster : MonoBehaviour {
             this.speed = speed;
             this.curve = curve;
             this.isReversed = isReversed;
+            this.positionNotesFrom = positionNotesFrom;
         }
     }
 
@@ -280,7 +282,7 @@ public class GameMaster : MonoBehaviour {
 
         allLaneIDString += lane;
         gameMasterPositions.Add(lane, 0);
-        timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1.0d));
+        timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
         lanesDictionary.Add(lane, tempLane);
         keyNumsOfLanes.Add(lane, keyNum);
 
@@ -293,7 +295,7 @@ public class GameMaster : MonoBehaviour {
         tempLane.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite = lanelatterSprites[keyNum];
     }
     
-    void CreateNote(char type, char lane, AnimationCurve[] curve, long hit, long appearPosition, long hitPosition, short longNoteID, bool isReversed, bool isMultiNote) {
+    void CreateNote(char type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, short longNoteID, bool isReversed, bool isMultiNote, float positionNotesFrom) {
 
         GameObject tempNote = Instantiate(noteGameObject);
 
@@ -318,17 +320,18 @@ public class GameMaster : MonoBehaviour {
 
         tempNoteProcesser.type = type;
         tempNoteProcesser.lane = lane;
-        tempNoteProcesser.keyNum = keyNumsOfLanes[lane]; //Additional
+        tempNoteProcesser.keyNum = keyNumsOfLanes[lane];
         tempNoteProcesser.curve = curve;
-        tempNoteProcesser.hit = hit;
+        tempNoteProcesser.hitTick = hitTick;
         tempNoteProcesser.appearPosition = appearPosition;
         tempNoteProcesser.hitPosition = hitPosition;
         tempNoteProcesser.longNoteID = longNoteID;
         tempNoteProcesser.isReversed = isReversed;
         tempNoteProcesser.isMultiNote = isMultiNote;
+        tempNoteProcesser.positionNotesFrom = positionNotesFrom;
     }
 
-    void CreateLaneMover(char type, char lane, AnimationCurve[] curve, long hit, long appearPosition, long hitPosition, float fromValue, float toValue) {
+    void CreateLaneMover(char type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, float fromValue, float toValue) {
         GameObject tempLaneMover = Instantiate(laneMoverGameObject);
 
         tempLaneMover.transform.parent = lanesDictionary[lane].transform;
@@ -339,7 +342,7 @@ public class GameMaster : MonoBehaviour {
         tempLaneMoverProcesser.type = type;
         tempLaneMoverProcesser.lane = lane;
         tempLaneMoverProcesser.curve = curve;
-        tempLaneMoverProcesser.hit = hit;
+        tempLaneMoverProcesser.hitTick = hitTick;
         tempLaneMoverProcesser.appearPosition = appearPosition;
         tempLaneMoverProcesser.hitPosition = hitPosition;
         tempLaneMoverProcesser.fromValue = fromValue;
@@ -361,6 +364,7 @@ public class GameMaster : MonoBehaviour {
             "MainCamera",
             "infoes"
         };
+
         foreach (Transform child in gameObject.transform) {
             if (Array.IndexOf(deleteIgnore, child.name) > -1) continue;
             GameObject.Destroy(child.gameObject);
@@ -406,6 +410,7 @@ public class GameMaster : MonoBehaviour {
         AnimationCurve[] curve = new AnimationCurve[] {curves[0]};
         double speed = 4;
         bool isReversed = false;
+        float positionNotesFrom = 160;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
             string[] scoreArgs = individualMatch.Groups[1].Value.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -421,11 +426,21 @@ public class GameMaster : MonoBehaviour {
                             (short)(scoreArgs.Length >= 4 ? longNoteIDs.IndexOf(scoreArgs[3] + lane) : -1),
                             speed,
                             curve,
-                            isReversed
+                            isReversed,
+                            positionNotesFrom
                         ));
                     }
                 } break;
-                case "a": case "d": case "x": case "y": case "z": {
+                case "a":
+                case "x": case "y": case "z":
+                case "dx": case "dy": case "dz":
+                case "cx": case "cy": case "cz":
+                case "cdx": case "cdy": case "cdz": {
+                    if (scoreArgs[0][0] == 'c') {
+                        if (scoreArgs[0][1] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][2] - 9);
+                        else scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 6);
+                    }
+                    else if (scoreArgs[0][0] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 3);
                     foreach (char lane in scoreArgs[1]) {
                         laneMoverDataHolders.Add(new LaneMoverDataHolder(
                             scoreArgs[0][0],
@@ -438,7 +453,10 @@ public class GameMaster : MonoBehaviour {
                         ));
                     }
                 } break;
-                case "path": {
+                case "positionfrom": case "posfrom": case "pf": {
+                    positionNotesFrom = float.Parse(scoreArgs[1]);
+                } break;
+                case "path": case "p": {
                     if (scoreArgs[1][0] == '-') {
                         isReversed = true;
                         scoreArgs[1] = scoreArgs[1].Substring(1);
@@ -449,7 +467,7 @@ public class GameMaster : MonoBehaviour {
                     }
                     curve = tempCurves.ToArray();
                 } break;
-                case "speed": {
+                case "speed": case "sp": {
                     speed = double.Parse(scoreArgs[1]);
                 } break;
                 case "bpm": {
@@ -457,12 +475,12 @@ public class GameMaster : MonoBehaviour {
                         timingPtsDic[lane].AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
                     }
                 } break;
-                case "scroll": {
+                case "scroll": case "scr": {
                     foreach (char lane in scoreArgs[1]) {
                         timingPtsDic[lane].AddScrollPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
                     }
                 } break;
-                case "jump": {
+                case "jump": case "jmp": {
                     foreach (char lane in scoreArgs[1]) {
                         timingPtsDic[lane].AddJumpPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
                     }
@@ -484,7 +502,8 @@ public class GameMaster : MonoBehaviour {
                 timingPtsDic[item.lane].GetPositionTickByBeat(item.beat),
                 item.longNoteID,
                 item.isReversed,
-                (index > 0 && item.beat == noteDataHolders[index - 1].beat) || (index < noteDataHolders.Count - 1 && item.beat == noteDataHolders[index + 1].beat)
+                (index > 0 && item.beat == noteDataHolders[index - 1].beat) || (index < noteDataHolders.Count - 1 && item.beat == noteDataHolders[index + 1].beat),
+                item.positionNotesFrom
             );
         }
 
