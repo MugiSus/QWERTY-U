@@ -2,7 +2,7 @@ ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
     - GameMaster
-    - InfoMover
+    - InfoProcesser
     - LaneMoverProcesser
     - LaneProcesser
     - NoteProcesser
@@ -41,15 +41,15 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 12282}
+      Script: {instanceID: 12280}
     - Class: 114
-      Script: {instanceID: 12754}
+      Script: {instanceID: 12752}
     - Class: 114
-      Script: {instanceID: 12944}
+      Script: {instanceID: 12942}
     - Class: 114
-      Script: {instanceID: 13778}
+      Script: {instanceID: 13776}
     - Class: 114
-      Script: {instanceID: 13852}
+      Script: {instanceID: 13850}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -203,7 +203,7 @@ ScriptsOnlyBuild:
     className: AspectRatioFitter
   - hash:
       serializedVersion: 2
-      Hash: 0af9f1c1e94122d2192e77b20334ffed
+      Hash: 2193c9d09a3cf7adb119148bbe06a774
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: LaneProcesser
@@ -269,7 +269,7 @@ ScriptsOnlyBuild:
     className: Selectable
   - hash:
       serializedVersion: 2
-      Hash: 99ca085f7e52fe3912d6e24e256ad6f8
+      Hash: 8a6c279ec1781ef8e64866528c63caa0
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: LaneMoverProcesser
@@ -299,7 +299,7 @@ ScriptsOnlyBuild:
     className: RemoteTestResultSender
   - hash:
       serializedVersion: 2
-      Hash: 780e0e61efffaf18840df797510e48bf
+      Hash: ad5b542e0bfe81b25fca4adea6ddda55
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: NoteProcesser
@@ -413,7 +413,7 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
-      Hash: 3da17cb6c31075a5b39bb071b077db32
+      Hash: 232a82dd60fb95b25c06a979c3c28233
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameMaster
@@ -425,10 +425,10 @@ ScriptsOnlyBuild:
     className: TMP_StyleSheet
   - hash:
       serializedVersion: 2
-      Hash: 0618555f7336fb603c1185b4e39e3549
+      Hash: 082dd75b79184e6adb0efbb91bf73407
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
-    className: InfoMover
+    className: InfoProcesser
   - hash:
       serializedVersion: 2
       Hash: a2612813f45d0ced02c3e4bc9dbea8b4

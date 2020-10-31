@@ -49,6 +49,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -100,18 +101,14 @@ MonoBehaviour:
   type: 0
   lane: 0
   keyNum: 0
-  curve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  hit: 0
-  speed: 0
-  position: 0
+  curve: []
+  hitTick: 0
+  appearPosition: 0
+  hitPosition: 0
   longNoteID: 0
   isReversed: 0
   isMultiNote: 0
+  positionNotesFrom: 0
 --- !u!210 &5471737813862908639
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -170,6 +167,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

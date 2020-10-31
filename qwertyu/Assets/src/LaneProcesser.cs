@@ -5,15 +5,22 @@ using UnityEngine;
 public class LaneProcesser : MonoBehaviour {
 
     public long position;
-    public bool alreadyRotated = false;
-    public Vector3 uniqueEulerAngles = new Vector3(90, 0, 0);
+
+    [HeaderAttribute("Moving")]
+    public bool alreadyMovedInThisFrame = false;
+    public Vector3 uniquePosition;
+
+    [HeaderAttribute("Rotating")]
+    public bool alreadyRotatedInThisFrame = false;
+    public Quaternion uniqueQuaternion;
 
     void Start() {
-
+        uniquePosition = transform.localPosition;
+        uniqueQuaternion = Quaternion.Euler(transform.localEulerAngles);
     }
 
     void Update() {
-        alreadyRotated = false;
+        alreadyMovedInThisFrame = false;
+        alreadyRotatedInThisFrame = false;
     }
-
 }

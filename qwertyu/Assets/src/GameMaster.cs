@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class GameMaster : MonoBehaviour {
 
+    public string musicTitle = "bpm_rt";
+
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
     [SerializeField] GameObject noteGameObject;
     [SerializeField] GameObject laneMoverGameObject;
@@ -128,7 +130,7 @@ public class GameMaster : MonoBehaviour {
     }
 
     class LaneMoverDataHolder {
-        public char type;
+        public string type;
         public char lane;
         public double beat;
         public double speed;
@@ -136,7 +138,7 @@ public class GameMaster : MonoBehaviour {
         public float fromValue;
         public float toValue;
 
-        public LaneMoverDataHolder(char type, char lane, double beat, double speed, AnimationCurve[] curve, float fromValue, float toValue) {
+        public LaneMoverDataHolder(string type, char lane, double beat, double speed, AnimationCurve[] curve, float fromValue, float toValue) {
             this.type = type;
             this.lane = lane;
             this.beat = beat;
@@ -331,7 +333,7 @@ public class GameMaster : MonoBehaviour {
         tempNoteProcesser.positionNotesFrom = positionNotesFrom;
     }
 
-    void CreateLaneMover(char type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, float fromValue, float toValue) {
+    void CreateLaneMover(string type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, float fromValue, float toValue) {
         GameObject tempLaneMover = Instantiate(laneMoverGameObject);
 
         tempLaneMover.transform.parent = lanesDictionary[lane].transform;
@@ -362,7 +364,7 @@ public class GameMaster : MonoBehaviour {
 
         string[] deleteIgnore = new string[] {
             "MainCamera",
-            "infoes"
+            "info"
         };
 
         foreach (Transform child in gameObject.transform) {
@@ -414,7 +416,13 @@ public class GameMaster : MonoBehaviour {
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
             string[] scoreArgs = individualMatch.Groups[1].Value.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
-            if (scoreArgs[1][0] == '~') scoreArgs[1] = allLaneIDString;
+            if (scoreArgs[1][0] == '~') {
+                string temp = allLaneIDString;
+                foreach (char lane in scoreArgs[1].Substring(1)) {
+                    temp = temp.Replace(lane.ToString(), "");
+                }
+                scoreArgs[1] = temp;
+            }
             switch (scoreArgs[0]) {
                 case "1": case "2": case "3": case "4": {
                     foreach (char lane in scoreArgs[1]) {
@@ -432,24 +440,17 @@ public class GameMaster : MonoBehaviour {
                     }
                 } break;
                 case "a":
-                case "x": case "y": case "z":
-                case "dx": case "dy": case "dz":
-                case "cx": case "cy": case "cz":
-                case "cdx": case "cdy": case "cdz": {
-                    if (scoreArgs[0][0] == 'c') {
-                        if (scoreArgs[0][1] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][2] - 9);
-                        else scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 6);
-                    }
-                    else if (scoreArgs[0][0] == 'd') scoreArgs[0] = "" + (char)(scoreArgs[0][1] - 3);
+                case "x": case "y": case "z": case "~x": case "~y": case "~z":
+                case "dx": case "dy": case "dz": case "~dx": case "~dy": case "~dz": {
                     foreach (char lane in scoreArgs[1]) {
                         laneMoverDataHolders.Add(new LaneMoverDataHolder(
-                            scoreArgs[0][0],
+                            scoreArgs[0],
                             lane,
                             double.Parse(scoreArgs[2]),
                             speed,
                             curve,
-                            float.Parse(scoreArgs[3]),
-                            float.Parse(scoreArgs[4])
+                            scoreArgs.Length < 5 ? 0 : float.Parse(scoreArgs[3]),
+                            scoreArgs.Length < 5 ? float.Parse(scoreArgs[3]) : float.Parse(scoreArgs[4])
                         ));
                     }
                 } break;
@@ -519,16 +520,26 @@ public class GameMaster : MonoBehaviour {
                 item.toValue
             );
         }
+
+        InfoProcesser infoProc = transform.Find("info").GetComponent<InfoProcesser>();
+
+        infoProc.progress = 0;
+        infoProc.combo = 0;
+        infoProc.title = scoreTextData["title"];
+        infoProc.author = scoreTextData["author"];
+        infoProc.score = 0;
+        infoProc.fullCombo = true;
+        infoProc.allPerfect = true;
         
         gameStartedTime = DateTime.Now.Ticks + 30000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000);
     }
 
     void Start() {
-        LoadScore("bpm_rt");
+        LoadScore(musicTitle);
     }
 
     void Update() {
-        if (Input.GetKey(KeyCode.Space)) LoadScore("bpm_rt");
+        if (Input.GetKey("space")) LoadScore(musicTitle);
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
         foreach (char lane in allLaneIDString) {
             lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);

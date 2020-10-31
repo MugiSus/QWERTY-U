@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 2207325885895636112}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 0}
+  m_LocalScale: {x: 10, y: 5000, z: 0}
   m_Children: []
   m_Father: {fileID: 3063328231782783068}
   m_RootOrder: 1
@@ -141,6 +141,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   position: 0
+  alreadyMovedInThisFrame: 0
+  uniquePosition: {x: 0, y: 0, z: 0}
+  alreadyRotatedInThisFrame: 0
+  uniqueEulerAngles: {x: 0, y: 0, z: 0}
 --- !u!1 &3063328231862497426
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,8 +8,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="300mm"
-   height="40000mm"
-   viewBox="0 0 300 40000"
+   height="100mm"
+   viewBox="0 0 300 100"
    version="1.1"
    id="svg8"
    inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
@@ -23,9 +23,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.64"
-     inkscape:cx="549.17313"
-     inkscape:cy="44833.45"
+     inkscape:zoom="0.90509668"
+     inkscape:cx="578.0938"
+     inkscape:cy="206.93152"
      inkscape:document-units="mm"
      inkscape:current-layer="svg8"
      showgrid="false"
@@ -55,22 +55,22 @@
      id="layer1"
      transform="translate(0,19703)" />
   <path
-     style="opacity:1;fill:#d0d0ff;fill-opacity:0.116402;fill-rule:nonzero;stroke:none;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 0,0 H 300 V 40000 H 0 Z"
+     style="opacity:1;fill:#d0d0ff;fill-opacity:0.116402;fill-rule:nonzero;stroke:none;stroke-width:7.50001;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     d="M 0,0 H 300 V 99.999999 H 0 Z"
      id="rect10"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="ccccc"
      inkscape:export-xdpi="131.81"
      inkscape:export-ydpi="131.81" />
   <path
-     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 300,40000 V 0"
+     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     d="M 300,99.999999 V 0"
      id="path1365"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path
-     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-     d="M 0,0 V 40000"
+     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     d="M 0,0 V 99.999999"
      id="path1369"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
