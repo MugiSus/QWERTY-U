@@ -46,7 +46,7 @@ public class NoteProcesser : MonoBehaviour {
         } else {
             for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
             transform.localPosition = new Vector3(0f, isReversed ? curve[0].Evaluate(time) * -positionNotesFrom : curve[0].Evaluate(time) * positionNotesFrom, 0);
-            appearAlpha += (1 - appearAlpha) / 5;
+            appearAlpha += (1 - appearAlpha) / 10;
         }
         
         float scale = 1 - (float)Math.Pow(1 - (hitTick - GameMaster.gameMasterTime) / 30000000f, 8);

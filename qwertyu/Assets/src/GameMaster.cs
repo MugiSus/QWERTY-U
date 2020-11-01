@@ -11,6 +11,7 @@ public class GameMaster : MonoBehaviour {
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
     [SerializeField] GameObject noteGameObject;
     [SerializeField] GameObject laneMoverGameObject;
+    [SerializeField] GameObject gameCameraGameObject;
 
     [SerializeField, HeaderAttribute("Note Sprites")] Sprite[] lanelatterSprites;
     [SerializeField] Sprite[] tapnoteSprites;
@@ -25,12 +26,14 @@ public class GameMaster : MonoBehaviour {
     
     [SerializeField, HeaderAttribute("Times")] public long gameStartedTime;
     public static long gameMasterTime;
+
     public static Dictionary<char, long> gameMasterPositions = new Dictionary<char, long>();
 
     int noteNum;
     int laneMoverNum;
 
     string allLaneIDString;
+
     Dictionary<char, sbyte> keyNumsOfLanes = new Dictionary<char, sbyte>();
     Dictionary<char, GameObject> lanesDictionary = new Dictionary<char, GameObject>();
     Dictionary<string, string> scoreTextData = new Dictionary<string, string>();
@@ -336,7 +339,10 @@ public class GameMaster : MonoBehaviour {
     void CreateLaneMover(string type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, float fromValue, float toValue) {
         GameObject tempLaneMover = Instantiate(laneMoverGameObject);
 
-        tempLaneMover.transform.parent = lanesDictionary[lane].transform;
+        if (type[0] == 'c') {
+            type = type.Substring(1);
+        }
+        else tempLaneMover.transform.parent = lanesDictionary[lane].transform;
         tempLaneMover.name = "laneMover_" + laneMoverNum++;
 
         var tempLaneMoverProcesser = tempLaneMover.gameObject.GetComponent<LaneMoverProcesser>();
@@ -363,8 +369,7 @@ public class GameMaster : MonoBehaviour {
         allLaneIDString = "";
 
         string[] deleteIgnore = new string[] {
-            "MainCamera",
-            "info"
+            "Info"
         };
 
         foreach (Transform child in gameObject.transform) {
@@ -393,6 +398,16 @@ public class GameMaster : MonoBehaviour {
         CreateLane('5', 40, -70, 0, 1, 5);
         CreateLane('6', 80, -70, 0, 1, 6);
         CreateLane('7', 120, -70, 0, 1, 7);
+
+        //creating main camera
+        GameObject tempGameCamera = Instantiate(gameCameraGameObject);
+        timingPtsDic.Add('@', new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
+        lanesDictionary.Add('@', tempGameCamera);
+        allLaneIDString += '@';
+        tempGameCamera.name = "GameCamera";
+        tempGameCamera.transform.parent = gameObject.transform;
+        tempGameCamera.transform.localPosition = new Vector3(0, 200, -20);
+        tempGameCamera.transform.rotation = Quaternion.Euler(85, 0, 0);
 
         var curvesList = new List<AnimationCurve>();
         var indexOfpathName = new Dictionary<string, int>();
@@ -521,7 +536,7 @@ public class GameMaster : MonoBehaviour {
             );
         }
 
-        InfoProcesser infoProc = transform.Find("info").GetComponent<InfoProcesser>();
+        InfoProcesser infoProc = transform.Find("Info").GetComponent<InfoProcesser>();
 
         infoProc.progress = 0;
         infoProc.combo = 0;
