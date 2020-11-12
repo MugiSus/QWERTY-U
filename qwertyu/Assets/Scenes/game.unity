@@ -1135,10 +1135,14 @@ MonoBehaviour:
     type: 3}
   noteGameObject: {fileID: 2091095051050051230, guid: 1f18d453a89084c4197f6fd3413b3ca7,
     type: 3}
+  longNoteGameObject: {fileID: 6242812953162113569, guid: 29e3d792039d15c41ac9edd96869fce2,
+    type: 3}
   laneMoverGameObject: {fileID: 1054398290478277285, guid: fdc73eda0c68b0f42a2172ec020535b0,
     type: 3}
   gameCameraGameObject: {fileID: 4584041190159871279, guid: 58caf4b6d5a46b641baf3b02638e4c4f,
     type: 3}
+  materialBlue: {fileID: 2100000, guid: 2973756dd4cdb1542a6db60480a568af, type: 2}
+  materialYellow: {fileID: 2100000, guid: e3019ea71d3b70c45ac9c7fd6bc5d8ea, type: 2}
   lanelatterSprites:
   - {fileID: 3286163911610860551, guid: fd179679b0f1a614a8845b7838c39766, type: 3}
   - {fileID: 3286163911610860551, guid: 3d546912817bdd5438dcb9e800f2fad9, type: 3}

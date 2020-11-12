@@ -5,6 +5,7 @@ ScriptsOnlyBuild:
     - InfoProcesser
     - LaneMoverProcesser
     - LaneProcesser
+    - LongNoteProcesser
     - NoteProcesser
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
@@ -43,13 +44,15 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 12278}
     - Class: 114
-      Script: {instanceID: 12750}
+      Script: {instanceID: 12508}
     - Class: 114
-      Script: {instanceID: 12940}
+      Script: {instanceID: 12752}
     - Class: 114
-      Script: {instanceID: 13774}
+      Script: {instanceID: 12942}
     - Class: 114
-      Script: {instanceID: 13848}
+      Script: {instanceID: 13776}
+    - Class: 114
+      Script: {instanceID: 13850}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -239,6 +242,12 @@ ScriptsOnlyBuild:
     className: Shadow
   - hash:
       serializedVersion: 2
+      Hash: 17d9ca41824adf6bbd6be1e72568e270
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: LongNoteProcesser
+  - hash:
+      serializedVersion: 2
       Hash: cc4274b586df3c02688bac01b88bd16c
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.EventSystems
@@ -413,7 +422,7 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
-      Hash: 0e8e8f6f83a39e40e361f8d3474606d0
+      Hash: 62faeaad27c218c56c9d75b0dec062c3
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameMaster

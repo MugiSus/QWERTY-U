@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 200631730903121022}
   - component: {fileID: 5471737813862908639}
   m_Layer: 0
-  m_Name: note
+  m_Name: Note
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -192,16 +192,16 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3286163911610860551, guid: 7420d71508d8a9a4196518460e1097a1,
+  m_Sprite: {fileID: 3286163911610860551, guid: fc3c554f732d8484d97247d3de8f366f,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.084853, y: 2.084853}
+  m_Size: {x: 2.0636396, y: 2.0636396}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!210 &7990855393660501719

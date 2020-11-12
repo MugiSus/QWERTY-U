@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -10,8 +11,12 @@ public class GameMaster : MonoBehaviour {
 
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
     [SerializeField] GameObject noteGameObject;
+    [SerializeField] GameObject longNoteGameObject;
     [SerializeField] GameObject laneMoverGameObject;
     [SerializeField] GameObject gameCameraGameObject;
+
+    [SerializeField, HeaderAttribute("Materials")] Material materialBlue;
+    [SerializeField] Material materialYellow;
 
     [SerializeField, HeaderAttribute("Note Sprites")] Sprite[] lanelatterSprites;
     [SerializeField] Sprite[] tapnoteSprites;
@@ -28,6 +33,7 @@ public class GameMaster : MonoBehaviour {
     public static long gameMasterTime;
 
     public static Dictionary<char, long> gameMasterPositions = new Dictionary<char, long>();
+    public static List<LongNoteInfo> longNoteInfoStorage = new List<LongNoteInfo>();
 
     int noteNum;
     int laneMoverNum;
@@ -149,6 +155,20 @@ public class GameMaster : MonoBehaviour {
             this.curve = curve;
             this.fromValue = fromValue;
             this.toValue = toValue;
+        }
+    }
+
+    public class LongNoteInfo {
+        public float startPosition = 0;
+        public float startTime = -1;
+        
+        public float endPosition = 0;
+        public float endTime = -1;
+
+        public byte alpha = 0;
+
+        public LongNoteInfo() {
+
         }
     }
 
@@ -301,27 +321,44 @@ public class GameMaster : MonoBehaviour {
     }
     
     void CreateNote(char type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, short longNoteID, bool isReversed, bool isMultiNote, float positionNotesFrom) {
+        
+        GameObject tempNote;
 
-        GameObject tempNote = Instantiate(noteGameObject);
+        if (type == '1' || type == '2') {
+            tempNote = Instantiate(noteGameObject);
 
-        tempNote.transform.parent = lanesDictionary[lane].transform;
-        tempNote.name = "note_" + noteNum++;
+            tempNote.transform.parent = lanesDictionary[lane].transform;
+            tempNote.name = "note_" + noteNum++;
 
-        SpriteRenderer tempSR;
-        tempSR = tempNote.gameObject.GetComponent<SpriteRenderer>();
-        if (type == '1' || type == '3') tempSR.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
-        else tempSR.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
+            SpriteRenderer tempSRNote = tempNote.gameObject.GetComponent<SpriteRenderer>();
+            if (type == '1') tempSRNote.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
+            else tempSRNote.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
 
-        tempSR = tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>();
-        if (isMultiNote) {
-            if (type == '1') tempSR.sprite = tapnoteTimingMultiSupport;
-            else if (type == '2') tempSR.sprite = slidenoteTimingMultiSupport;
         } else {
-            if (type == '1') tempSR.sprite = tapnoteTimingSupport;
-            else if (type == '2') tempSR.sprite = slidenoteTimingSupport;
+            tempNote = Instantiate(longNoteGameObject);
+            tempNote.transform.parent = lanesDictionary[lane].transform;
+            tempNote.name = "note_" + noteNum++;
+
+            MeshRenderer tempMR = tempNote.gameObject.GetComponent<MeshRenderer>();
+            if (type == '3') tempMR.materials[0] = materialBlue;
+            else tempMR.materials[0] = materialYellow;
+            tempMR.material.color -= new Color(0, 0, 0, 0.7f);
+
+            LongNoteProcesser tempLNP = tempNote.gameObject.GetComponent<LongNoteProcesser>();
+            tempLNP.longNoteID = longNoteID;
+            tempLNP.isReversed = isReversed;
         }
 
-        var tempNoteProcesser = tempNote.gameObject.GetComponent<NoteProcesser>();
+        SpriteRenderer tempSRTimingSupport = tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>();
+        if (isMultiNote) {
+            if (type == '1' || type == '3') tempSRTimingSupport.sprite = tapnoteTimingMultiSupport;
+            else tempSRTimingSupport.sprite = slidenoteTimingMultiSupport;
+        } else {
+            if (type == '1' || type == '3') tempSRTimingSupport.sprite = tapnoteTimingSupport;
+            else tempSRTimingSupport.sprite = slidenoteTimingSupport;
+        }
+
+        NoteProcesser tempNoteProcesser = tempNote.gameObject.GetComponent<NoteProcesser>();
 
         tempNoteProcesser.type = type;
         tempNoteProcesser.lane = lane;
@@ -379,6 +416,7 @@ public class GameMaster : MonoBehaviour {
         
         string scoreFullText = ((TextAsset)Resources.Load("scores/" + scoreFileName + "/" + scoreFileName + ".qwertyuscore")).text;
 
+        scoreFullText = Regex.Replace(scoreFullText, @"\/\*.*\*\/", "", RegexOptions.Singleline);
         scoreFullText = Regex.Replace(scoreFullText, @"//.*?$", "", RegexOptions.Multiline);
 
         scoreTextData["title"] = Regex.Matches(scoreFullText, @"title:(.*)")[0].Groups[1].Value;
@@ -403,7 +441,6 @@ public class GameMaster : MonoBehaviour {
         GameObject tempGameCamera = Instantiate(gameCameraGameObject);
         timingPtsDic.Add('@', new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
         lanesDictionary.Add('@', tempGameCamera);
-        allLaneIDString += '@';
         tempGameCamera.name = "GameCamera";
         tempGameCamera.transform.parent = gameObject.transform;
         tempGameCamera.transform.localPosition = new Vector3(0, 200, -20);
@@ -428,24 +465,30 @@ public class GameMaster : MonoBehaviour {
         double speed = 4;
         bool isReversed = false;
         float positionNotesFrom = 160;
+        double beatDefault = 0;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
+            
             string[] scoreArgs = individualMatch.Groups[1].Value.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
-            if (scoreArgs[1][0] == '~') {
+            if (scoreArgs.Length > 1 && scoreArgs[1][0] == '~') {
                 string temp = allLaneIDString;
                 foreach (char lane in scoreArgs[1].Substring(1)) {
                     temp = temp.Replace(lane.ToString(), "");
                 }
                 scoreArgs[1] = temp;
             }
+
             switch (scoreArgs[0]) {
                 case "1": case "2": case "3": case "4": {
                     foreach (char lane in scoreArgs[1]) {
-                        if (scoreArgs.Length >= 4 && longNoteIDs.IndexOf(scoreArgs[3] + lane) == -1) longNoteIDs.Add(scoreArgs[3] + lane);
+                        if (scoreArgs.Length >= 4 && longNoteIDs.IndexOf(scoreArgs[3] + lane) == -1) {
+                            longNoteIDs.Add(scoreArgs[3] + lane);
+                            longNoteInfoStorage.Add(new LongNoteInfo());
+                        }
                         noteDataHolders.Add(new NoteDataHolder(
                             scoreArgs[0][0],
                             lane,
-                            double.Parse(scoreArgs[2]),
+                            beatDefault + double.Parse(scoreArgs[2]),
                             (short)(scoreArgs.Length >= 4 ? longNoteIDs.IndexOf(scoreArgs[3] + lane) : -1),
                             speed,
                             curve,
@@ -454,14 +497,14 @@ public class GameMaster : MonoBehaviour {
                         ));
                     }
                 } break;
-                case "a":
+                case "a": case "~a":
                 case "x": case "y": case "z": case "~x": case "~y": case "~z":
                 case "dx": case "dy": case "dz": case "~dx": case "~dy": case "~dz": {
                     foreach (char lane in scoreArgs[1]) {
                         laneMoverDataHolders.Add(new LaneMoverDataHolder(
                             scoreArgs[0],
                             lane,
-                            double.Parse(scoreArgs[2]),
+                            beatDefault + double.Parse(scoreArgs[2]),
                             speed,
                             curve,
                             scoreArgs.Length < 5 ? 0 : float.Parse(scoreArgs[3]),
@@ -471,6 +514,9 @@ public class GameMaster : MonoBehaviour {
                 } break;
                 case "positionfrom": case "posfrom": case "pf": {
                     positionNotesFrom = float.Parse(scoreArgs[1]);
+                } break;
+                case "beatdefault": case "beatdef": case "bd": {
+                    beatDefault = scoreArgs.Length == 1 ? 0 : double.Parse(scoreArgs[1]);
                 } break;
                 case "path": case "p": {
                     if (scoreArgs[1][0] == '-') {
@@ -488,17 +534,18 @@ public class GameMaster : MonoBehaviour {
                 } break;
                 case "bpm": {
                     foreach (char lane in allLaneIDString) {
-                        timingPtsDic[lane].AddBPMPoint(double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
+                        timingPtsDic[lane].AddBPMPoint(beatDefault + double.Parse(scoreArgs[1]), double.Parse(scoreArgs[2]));
                     }
                 } break;
                 case "scroll": case "scr": {
                     foreach (char lane in scoreArgs[1]) {
-                        timingPtsDic[lane].AddScrollPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                        timingPtsDic[lane].AddScrollPoint(beatDefault + double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
                     }
                 } break;
                 case "jump": case "jmp": {
+                    //if (scoreArgs.Length < 3) throw new SyntaxErrorException("Not enough arguments given (3 arguments required)");
                     foreach (char lane in scoreArgs[1]) {
-                        timingPtsDic[lane].AddJumpPoint(double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
+                        timingPtsDic[lane].AddJumpPoint(beatDefault + double.Parse(scoreArgs[2]), double.Parse(scoreArgs[3]));
                     }
                 } break;
             }
@@ -556,7 +603,7 @@ public class GameMaster : MonoBehaviour {
     void Update() {
         if (Input.GetKey("space")) LoadScore(musicTitle);
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
-        foreach (char lane in allLaneIDString) {
+        foreach (char lane in allLaneIDString + '@') {
             lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);
         }
         if (Input.GetKey(KeyCode.Escape)) UnityEngine.Application.Quit();
