@@ -8,6 +8,7 @@ using UnityEngine;
 public class GameMaster : MonoBehaviour {
 
     public string musicTitle = "bpm_rt";
+    public bool debug;
 
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
     [SerializeField] GameObject noteGameObject;
@@ -597,7 +598,7 @@ public class GameMaster : MonoBehaviour {
         infoProc.fullCombo = true;
         infoProc.allPerfect = true;
         
-        gameStartedTime = DateTime.Now.Ticks + 20000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000) - timingPtsDic['@'].GetHitTickByBeat(startingPoint);
+        gameStartedTime = DateTime.Now.Ticks + 20000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000) - (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0);
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
     }
 
