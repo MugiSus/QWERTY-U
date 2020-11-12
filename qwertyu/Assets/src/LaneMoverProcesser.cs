@@ -14,7 +14,7 @@ public class LaneMoverProcesser : MonoBehaviour {
     public AnimationCurve[] curve;
     
     [SerializeField] bool inProcess = false;
-    [SerializeField] bool isPast = false;
+    [SerializeField] bool inPast = false;
     [SerializeField] Vector3 additionalVector = new Vector3(0, 0, 0);
     
     LaneProcesser parentSrcComp;
@@ -23,6 +23,10 @@ public class LaneMoverProcesser : MonoBehaviour {
     void Start() {
         parentSrcComp = transform.parent.gameObject.GetComponent<LaneProcesser>();
         if (type == "a") laneSR = transform.parent.GetChild(1).gameObject.GetComponent<SpriteRenderer>();
+        if (hitTick < GameMaster.gameMasterTime) {
+            inProcess = true;
+            inPast = true;
+        }
     }
 
     void Update() {
@@ -32,9 +36,9 @@ public class LaneMoverProcesser : MonoBehaviour {
         if (inProcess) {
             if (time < 0) inProcess = false;
             else if (time > 1) {
-                isPast = true;
+                inPast = true;
                 inProcess = false;
-            } else if (isPast) isPast = false;
+            } else if (inPast) inPast = false;
         } else {
             if (time >= 0 && time <= 1) inProcess = true;
             else return;
@@ -46,7 +50,7 @@ public class LaneMoverProcesser : MonoBehaviour {
                 
             } break;
             case "x": case "y": case "z": {
-                if (inProcess && isPast) parentSrcComp.uniquePosition -= additionalVector;
+                if (inProcess && inPast) parentSrcComp.uniquePosition -= additionalVector;
                 additionalVector = new Vector3(0, 0, 0);
                 switch (type[0]) {
                     case 'x': additionalVector.x = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
@@ -58,10 +62,10 @@ public class LaneMoverProcesser : MonoBehaviour {
                     transform.parent.localPosition = parentSrcComp.uniquePosition + additionalVector;
                     parentSrcComp.alreadyMovedInThisFrame = true;
                 }
-                if (!inProcess && isPast) parentSrcComp.uniquePosition += additionalVector;
+                if (!inProcess && inPast) parentSrcComp.uniquePosition += additionalVector;
             } break;
             case "dx": case "dy": case "dz": {
-                if (inProcess && isPast) parentSrcComp.uniqueQuaternion *= Quaternion.Euler(additionalVector * -1);
+                if (inProcess && inPast) parentSrcComp.uniqueQuaternion *= Quaternion.Euler(additionalVector * -1);
                 additionalVector = new Vector3(0, 0, 0);
                 switch (type[1]) {
                     case 'x': additionalVector.x = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
@@ -73,7 +77,7 @@ public class LaneMoverProcesser : MonoBehaviour {
                     transform.parent.rotation = parentSrcComp.uniqueQuaternion * Quaternion.Euler(additionalVector);
                     parentSrcComp.alreadyRotatedInThisFrame = true;
                 }
-                if (!inProcess && isPast) parentSrcComp.uniqueQuaternion = transform.parent.rotation;
+                if (!inProcess && inPast) parentSrcComp.uniqueQuaternion = transform.parent.rotation;
             } break;
             case "a": {
                 var mpb = new MaterialPropertyBlock();

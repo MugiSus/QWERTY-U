@@ -466,6 +466,7 @@ public class GameMaster : MonoBehaviour {
         bool isReversed = false;
         float positionNotesFrom = 160;
         double beatDefault = 0;
+        double startingPoint = 0;
 
         foreach (Match individualMatch in Regex.Matches(scoreTextData["score"], @"\( *(.*?) *\)", RegexOptions.Singleline)) {
             
@@ -517,6 +518,9 @@ public class GameMaster : MonoBehaviour {
                 } break;
                 case "beatdefault": case "beatdef": case "bd": {
                     beatDefault = scoreArgs.Length == 1 ? 0 : double.Parse(scoreArgs[1]);
+                } break;
+                case ">": {
+                    startingPoint = scoreArgs.Length == 1 ? beatDefault : beatDefault + double.Parse(scoreArgs[1]);
                 } break;
                 case "path": case "p": {
                     if (scoreArgs[1][0] == '-') {
@@ -593,7 +597,8 @@ public class GameMaster : MonoBehaviour {
         infoProc.fullCombo = true;
         infoProc.allPerfect = true;
         
-        gameStartedTime = DateTime.Now.Ticks + 30000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000);
+        gameStartedTime = DateTime.Now.Ticks + 20000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000) - timingPtsDic['@'].GetHitTickByBeat(startingPoint);
+        gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
     }
 
     void Start() {
