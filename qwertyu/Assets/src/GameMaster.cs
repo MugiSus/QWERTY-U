@@ -29,7 +29,7 @@ public class GameMaster : MonoBehaviour {
     [SerializeField] Sprite slidenoteTimingMultiSupport;
 
     [SerializeField] AnimationCurve[] curves;
-    
+
     [SerializeField, HeaderAttribute("Times")] public long gameStartedTime;
     public static long gameMasterTime;
 
@@ -46,6 +46,7 @@ public class GameMaster : MonoBehaviour {
     Dictionary<string, string> scoreTextData = new Dictionary<string, string>();
 
     Dictionary<char, TimingPoints> timingPtsDic = new Dictionary<char, TimingPoints>();
+    Dictionary<char, List<ActivationDatum>> activationDataDic = new Dictionary<char, List<ActivationDatum>>();
 
     class TimingPoints {
         
@@ -160,6 +161,7 @@ public class GameMaster : MonoBehaviour {
     }
 
     public class LongNoteInfo {
+        public long startAppearPosition = 0;
         public float startPosition = 0;
         public float startTime = -1;
         
@@ -170,6 +172,19 @@ public class GameMaster : MonoBehaviour {
 
         public LongNoteInfo() {
 
+        }
+    }
+
+    public class ActivationDatum {
+
+        public long appearPosition;
+        public long hitPosition;
+        public GameObject activationTarget;
+
+        public ActivationDatum(long appearPosition, long hitPosition, GameObject activationTarget) {
+            this.appearPosition = appearPosition;
+            this.hitPosition = hitPosition;
+            this.activationTarget = activationTarget;
         }
     }
 
@@ -308,9 +323,10 @@ public class GameMaster : MonoBehaviour {
 
         allLaneIDString += lane;
         gameMasterPositions.Add(lane, 0);
-        timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
-        lanesDictionary.Add(lane, tempLane);
         keyNumsOfLanes.Add(lane, keyNum);
+        lanesDictionary.Add(lane, tempLane);
+        timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1));
+        activationDataDic.Add(lane, new List<ActivationDatum>());
 
         tempLane.transform.parent = this.gameObject.transform;
 
@@ -335,15 +351,16 @@ public class GameMaster : MonoBehaviour {
             if (type == '1') tempSRNote.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
             else tempSRNote.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
 
+            if (longNoteID != -1) longNoteInfoStorage[longNoteID].startAppearPosition = appearPosition;
+
         } else {
             tempNote = Instantiate(longNoteGameObject);
             tempNote.transform.parent = lanesDictionary[lane].transform;
             tempNote.name = "note_" + noteNum++;
 
             MeshRenderer tempMR = tempNote.gameObject.GetComponent<MeshRenderer>();
-            if (type == '3') tempMR.materials[0] = materialBlue;
-            else tempMR.materials[0] = materialYellow;
-            tempMR.material.color -= new Color(0, 0, 0, 0.7f);
+            if (type == '3') tempMR.material = materialBlue;
+            else tempMR.material = materialYellow;
 
             LongNoteProcesser tempLNP = tempNote.gameObject.GetComponent<LongNoteProcesser>();
             tempLNP.longNoteID = longNoteID;
@@ -372,15 +389,18 @@ public class GameMaster : MonoBehaviour {
         tempNoteProcesser.isReversed = isReversed;
         tempNoteProcesser.isMultiNote = isMultiNote;
         tempNoteProcesser.positionNotesFrom = positionNotesFrom;
+
+        activationDataDic[lane].Add(new ActivationDatum(
+            (type == '1' || type == '2') ? appearPosition : longNoteInfoStorage[longNoteID].startAppearPosition,
+            hitPosition,
+            tempNote
+        ));
     }
 
     void CreateLaneMover(string type, char lane, AnimationCurve[] curve, long hitTick, long appearPosition, long hitPosition, float fromValue, float toValue) {
         GameObject tempLaneMover = Instantiate(laneMoverGameObject);
 
-        if (type[0] == 'c') {
-            type = type.Substring(1);
-        }
-        else tempLaneMover.transform.parent = lanesDictionary[lane].transform;
+        tempLaneMover.transform.parent = lanesDictionary[lane].transform;
         tempLaneMover.name = "laneMover_" + laneMoverNum++;
 
         var tempLaneMoverProcesser = tempLaneMover.gameObject.GetComponent<LaneMoverProcesser>();
@@ -393,6 +413,12 @@ public class GameMaster : MonoBehaviour {
         tempLaneMoverProcesser.hitPosition = hitPosition;
         tempLaneMoverProcesser.fromValue = fromValue;
         tempLaneMoverProcesser.toValue = toValue;
+
+        activationDataDic[lane].Add(new ActivationDatum(
+            appearPosition,
+            hitPosition,
+            tempLaneMover
+        ));
     }
 
     void LoadScore(string scoreFileName) {
@@ -402,6 +428,7 @@ public class GameMaster : MonoBehaviour {
         lanesDictionary = new Dictionary<char, GameObject>();
         scoreTextData = new Dictionary<string, string>();
         timingPtsDic = new Dictionary<char, TimingPoints>();
+        activationDataDic = new Dictionary<char, List<ActivationDatum>>();
         noteNum = 0;
         laneMoverNum = 0;
         allLaneIDString = "";
@@ -442,6 +469,8 @@ public class GameMaster : MonoBehaviour {
         GameObject tempGameCamera = Instantiate(gameCameraGameObject);
         timingPtsDic.Add('@', new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
         lanesDictionary.Add('@', tempGameCamera);
+        activationDataDic.Add('@', new List<ActivationDatum>());
+
         tempGameCamera.name = "GameCamera";
         tempGameCamera.transform.parent = gameObject.transform;
         tempGameCamera.transform.localPosition = new Vector3(0, 200, -20);
@@ -588,6 +617,10 @@ public class GameMaster : MonoBehaviour {
             );
         }
 
+        foreach (var lane in allLaneIDString + '@') {
+            activationDataDic[lane].Sort((x, y) => x.appearPosition > y.appearPosition ? 1 : x.appearPosition < y.appearPosition ? -1 : 0);
+        }
+
         InfoProcesser infoProc = transform.Find("Info").GetComponent<InfoProcesser>();
 
         infoProc.progress = 0;
@@ -602,16 +635,31 @@ public class GameMaster : MonoBehaviour {
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
     }
 
+    void ActivateNotes() {
+        foreach (var lane in allLaneIDString + '@') {
+            long anchorPosition = lanesDictionary[lane].GetComponent<LaneProcesser>().position;
+            foreach (var item in activationDataDic[lane]) {
+                if (item.appearPosition < anchorPosition) {
+                    if (!item.activationTarget.activeSelf && item.hitPosition > anchorPosition) {
+                        item.activationTarget.SetActive(true);
+                    }
+                }
+            }
+        }
+    }
+
     void Start() {
         LoadScore(musicTitle);
     }
 
     void Update() {
+        if (Input.GetKey(KeyCode.Escape)) UnityEngine.Application.Quit();
         if (Input.GetKey("space")) LoadScore(musicTitle);
+        
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
         foreach (char lane in allLaneIDString + '@') {
             lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);
         }
-        if (Input.GetKey(KeyCode.Escape)) UnityEngine.Application.Quit();
+        ActivateNotes();
     }
 }

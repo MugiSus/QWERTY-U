@@ -19,7 +19,10 @@ public class LongNoteProcesser : MonoBehaviour {
     }
 
     void Update() {
-        meshRenderer.material.color = new Color32(136, 238, 255, GameMaster.longNoteInfoStorage[longNoteID].alpha);
+        
+        Color32 tempColor = meshRenderer.material.color;
+        tempColor.a = GameMaster.longNoteInfoStorage[longNoteID].alpha;
+        meshRenderer.material.color = tempColor;
 
         longPairPosition = (GameMaster.longNoteInfoStorage[longNoteID].startPosition - transform.localPosition.y) / 12.5f;
 

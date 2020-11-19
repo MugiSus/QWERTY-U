@@ -1131,6 +1131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicTitle: bpm_rt
+  debug: 0
   laneGameObject: {fileID: 3063328231782783058, guid: a0cfd20d5cdb4dc499e1c0230d00299c,
     type: 3}
   noteGameObject: {fileID: 2091095051050051230, guid: 1f18d453a89084c4197f6fd3413b3ca7,

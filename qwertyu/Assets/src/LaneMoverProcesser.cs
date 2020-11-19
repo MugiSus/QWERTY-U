@@ -27,6 +27,9 @@ public class LaneMoverProcesser : MonoBehaviour {
             inProcess = true;
             inPast = true;
         }
+
+        Update();
+        gameObject.SetActive(false);
     }
 
     void Update() {
@@ -41,7 +44,10 @@ public class LaneMoverProcesser : MonoBehaviour {
             } else if (inPast) inPast = false;
         } else {
             if (time >= 0 && time <= 1) inProcess = true;
-            else return;
+            else {
+                if (time > 1) gameObject.SetActive(false);
+                return;
+            }
         }
         for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
 

@@ -31,6 +31,9 @@ public class NoteProcesser : MonoBehaviour {
         parentSrcComp = transform.parent.gameObject.GetComponent<LaneProcesser>();
 
         transform.localEulerAngles = new Vector3(0, 0, 0);
+
+        Update();
+        gameObject.SetActive(false);
     }
 
     void Update() {
@@ -40,9 +43,13 @@ public class NoteProcesser : MonoBehaviour {
         if (time < 0) {
             transform.localPosition = new Vector3(0, isReversed ? -positionNotesFrom : positionNotesFrom, 0);
             appearAlpha = 0;
+            if (type == '1' || type == '2' || GameMaster.longNoteInfoStorage[longNoteID].startAppearPosition > parentSrcComp.position) gameObject.SetActive(false);
         } else if (time > 1) {
             transform.localPosition = new Vector3(0, 0, 0);
-            if (longNoteID == -1 || GameMaster.longNoteInfoStorage[longNoteID].endTime > 1) appearAlpha = 0;
+            if (longNoteID == -1 || GameMaster.longNoteInfoStorage[longNoteID].endTime > 1) {
+                appearAlpha = 0;
+                gameObject.SetActive(false);
+            }
         } else {
             for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
             transform.localPosition = new Vector3(0f, isReversed ? curve[0].Evaluate(time) * -positionNotesFrom : curve[0].Evaluate(time) * positionNotesFrom, 0);

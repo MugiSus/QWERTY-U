@@ -43,3 +43,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00bea79661cf8504681346a9514ab2a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  type: 
+  lane: 0
+  hitTick: 0
+  fromValue: 0
+  toValue: 0
+  appearPosition: 0
+  hitPosition: 0
+  curve: []
+  inProcess: 0
+  inPast: 0
+  additionalVector: {x: 0, y: 0, z: 0}
