@@ -24,13 +24,18 @@ public class NoteProcesser : MonoBehaviour {
     SpriteRenderer noteSR;
     LaneProcesser parentSrcComp;
 
+    GameMaster.LongNoteInfo longNoteInfo;
+
     void Start() {
         mpb = new MaterialPropertyBlock();
         timingSupportSR = transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>();
         if (type == '1' || type == '2') noteSR = gameObject.GetComponent<SpriteRenderer>();
+        else noteSR = transform.GetChild(1).gameObject.GetComponent<SpriteRenderer>();
         parentSrcComp = transform.parent.gameObject.GetComponent<LaneProcesser>();
 
         transform.localEulerAngles = new Vector3(0, 0, 0);
+
+        if (longNoteID != -1) longNoteInfo = GameMaster.longNoteInfoStorage[longNoteID];
 
         Update();
         gameObject.SetActive(false);
@@ -42,40 +47,47 @@ public class NoteProcesser : MonoBehaviour {
         
         if (time < 0) {
             transform.localPosition = new Vector3(0, isReversed ? -positionNotesFrom : positionNotesFrom, 0);
-            appearAlpha = 0;
-            if (type == '1' || type == '2' || GameMaster.longNoteInfoStorage[longNoteID].startAppearPosition > parentSrcComp.position) gameObject.SetActive(false);
+            if (type == '1' || type == '2' || longNoteInfo.startAppearPosition > parentSrcComp.position || longNoteInfo.endHitPosition < parentSrcComp.position) {
+                if (longNoteID == -1) appearAlpha = 0;
+                gameObject.SetActive(false);
+            }
         } else if (time > 1) {
             transform.localPosition = new Vector3(0, 0, 0);
-            if (longNoteID == -1 || GameMaster.longNoteInfoStorage[longNoteID].endTime > 1) {
-                appearAlpha = 0;
+            if (type == '1' || type == '2' || longNoteInfo.startAppearPosition > parentSrcComp.position || longNoteInfo.endHitPosition < parentSrcComp.position) {
+                if (longNoteID == -1) appearAlpha = 0;
                 gameObject.SetActive(false);
             }
         } else {
             for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
             transform.localPosition = new Vector3(0f, isReversed ? curve[0].Evaluate(time) * -positionNotesFrom : curve[0].Evaluate(time) * positionNotesFrom, 0);
-            if (type == '1' || type == '2' || GameMaster.longNoteInfoStorage[longNoteID].startTime > 1) appearAlpha += (1 - appearAlpha) / 10;
+            if (type == '1' || type == '2' || longNoteInfo.startHitPosition < parentSrcComp.position) appearAlpha += (1 - appearAlpha) / 10;
         }
         
         float scale = 1 - (float)Math.Pow(1 - (hitTick - GameMaster.gameMasterTime) / 30000000f, 10);
-        float alpha = time < 0 || time > 1 ? 0 : Math.Min(Math.Max(1 - (hitTick - GameMaster.gameMasterTime) / 30000000f, 0), 1);
+        float alpha = time < 0 || time > 1 || hitTick < GameMaster.gameMasterTime ? 0 : Math.Min(Math.Max(1 - (hitTick - GameMaster.gameMasterTime) / 30000000f, 0), 1);
 
         if (type == '1' || type == '2') {
             if (longNoteID != -1) {
-                GameMaster.longNoteInfoStorage[longNoteID].startPosition = transform.localPosition.y;
-                GameMaster.longNoteInfoStorage[longNoteID].startTime = time;
-                GameMaster.longNoteInfoStorage[longNoteID].alpha = (byte)(80 * appearAlpha);
+                longNoteInfo.startNotePosition = transform.localPosition.y;
+                longNoteInfo.startAlpha = (byte)(80 * appearAlpha);
             }
+
+            if (time > 0 || time < 1) mpb.SetColor("_Color", new Color(1, 1, 1, appearAlpha));
+            else mpb.SetColor("_Color", new Color(1, 1, 1, 0));
+            noteSR.SetPropertyBlock(mpb);
 
             transform.GetChild(0).localScale = new Vector3(scale * 1.5f + 1, scale * 1.5f + 1, 1);
             mpb.SetColor("_Color", new Color(1, 1, 1, alpha * appearAlpha));
             timingSupportSR.SetPropertyBlock(mpb);
-
-            if ((time < 0 || time > 1) && (longNoteID == -1 || GameMaster.longNoteInfoStorage[longNoteID].endTime > 1)) mpb.SetColor("_Color", new Color(1, 1, 1, 0));
-            else mpb.SetColor("_Color", new Color(1, 1, 1, appearAlpha));
-            noteSR.SetPropertyBlock(mpb);
         } else {
-            GameMaster.longNoteInfoStorage[longNoteID].endPosition = transform.localPosition.y;
-            GameMaster.longNoteInfoStorage[longNoteID].endTime = time;
+            transform.GetChild(0).position = transform.parent.position;
+            transform.GetChild(1).position = transform.parent.position;
+
+            if (longNoteInfo.startHitPosition < parentSrcComp.position) mpb.SetColor("_Color", new Color(1, 1, 1, 1));
+            else mpb.SetColor("_Color", new Color(1, 1, 1, 0));
+            noteSR.SetPropertyBlock(mpb);
+
+            longNoteInfo.endAlpha = (byte)(80 * appearAlpha);
 
             transform.GetChild(0).localScale = new Vector3(scale * 1f + 1, scale * 1f + 1, 1);
             mpb.SetColor("_Color", new Color(1, 1, 1, alpha * appearAlpha));

@@ -35,6 +35,8 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
+    - Class: 82
+      Script: {instanceID: 0}
     - Class: 83
       Script: {instanceID: 0}
     - Class: 102
@@ -42,17 +44,17 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 12278}
+      Script: {instanceID: 12280}
     - Class: 114
-      Script: {instanceID: 12508}
+      Script: {instanceID: 12510}
     - Class: 114
-      Script: {instanceID: 12752}
+      Script: {instanceID: 12754}
     - Class: 114
-      Script: {instanceID: 12942}
+      Script: {instanceID: 12944}
     - Class: 114
-      Script: {instanceID: 13776}
+      Script: {instanceID: 13778}
     - Class: 114
-      Script: {instanceID: 13850}
+      Script: {instanceID: 13852}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 120
@@ -242,7 +244,7 @@ ScriptsOnlyBuild:
     className: Shadow
   - hash:
       serializedVersion: 2
-      Hash: 17d9ca41824adf6bbd6be1e72568e270
+      Hash: 36ae0877d020240fb926d4164c43052f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: LongNoteProcesser

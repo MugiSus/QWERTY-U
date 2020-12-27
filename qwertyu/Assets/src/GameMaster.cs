@@ -46,7 +46,10 @@ public class GameMaster : MonoBehaviour {
     Dictionary<string, string> scoreTextData = new Dictionary<string, string>();
 
     Dictionary<char, TimingPoints> timingPtsDic = new Dictionary<char, TimingPoints>();
-    Dictionary<char, List<ActivationDatum>> activationDataDic = new Dictionary<char, List<ActivationDatum>>();
+    Dictionary<char, List<ActivationDatum>> activationDataListDic = new Dictionary<char, List<ActivationDatum>>();
+    Dictionary<char, ActivationDatum[]> activationDataArrDic = new Dictionary<char, ActivationDatum[]>();
+
+    Dictionary<string, AudioSource> audioSources = new Dictionary<string, AudioSource>();
 
     class TimingPoints {
         
@@ -162,13 +165,14 @@ public class GameMaster : MonoBehaviour {
 
     public class LongNoteInfo {
         public long startAppearPosition = 0;
-        public float startPosition = 0;
-        public float startTime = -1;
+        public long startHitPosition = 0;
+        //public long startHitTick = 0;
+        public byte startAlpha = 0;
+        public float startNotePosition = 0;
         
-        public float endPosition = 0;
-        public float endTime = -1;
-
-        public byte alpha = 0;
+        public long endHitPosition = 0;
+        //public long endHitTick = 0;
+        public byte endAlpha = 0;
 
         public LongNoteInfo() {
 
@@ -176,12 +180,13 @@ public class GameMaster : MonoBehaviour {
     }
 
     public class ActivationDatum {
-
+        public long hitTick;
         public long appearPosition;
         public long hitPosition;
         public GameObject activationTarget;
 
-        public ActivationDatum(long appearPosition, long hitPosition, GameObject activationTarget) {
+        public ActivationDatum(long hitTick, long appearPosition, long hitPosition, GameObject activationTarget) {
+            this.hitTick = hitTick;
             this.appearPosition = appearPosition;
             this.hitPosition = hitPosition;
             this.activationTarget = activationTarget;
@@ -326,7 +331,7 @@ public class GameMaster : MonoBehaviour {
         keyNumsOfLanes.Add(lane, keyNum);
         lanesDictionary.Add(lane, tempLane);
         timingPtsDic.Add(lane, new TimingPoints(double.Parse(scoreTextData["bpm"]), 1));
-        activationDataDic.Add(lane, new List<ActivationDatum>());
+        activationDataListDic.Add(lane, new List<ActivationDatum>());
 
         tempLane.transform.parent = this.gameObject.transform;
 
@@ -351,12 +356,20 @@ public class GameMaster : MonoBehaviour {
             if (type == '1') tempSRNote.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
             else tempSRNote.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
 
-            if (longNoteID != -1) longNoteInfoStorage[longNoteID].startAppearPosition = appearPosition;
+            if (longNoteID != -1) {
+                longNoteInfoStorage[longNoteID].startAppearPosition = appearPosition;
+                longNoteInfoStorage[longNoteID].startHitPosition = hitPosition;
+                //longNoteInfoStorage[longNoteID].startHitTick = hitTick;
+            }
 
         } else {
             tempNote = Instantiate(longNoteGameObject);
             tempNote.transform.parent = lanesDictionary[lane].transform;
             tempNote.name = "note_" + noteNum++;
+
+            SpriteRenderer tempSRNote = tempNote.transform.GetChild(1).gameObject.GetComponent<SpriteRenderer>();
+            if (type == '3') tempSRNote.sprite = tapnoteSprites[keyNumsOfLanes[lane]];
+            else tempSRNote.sprite = slidenoteSprites[keyNumsOfLanes[lane]];
 
             MeshRenderer tempMR = tempNote.gameObject.GetComponent<MeshRenderer>();
             if (type == '3') tempMR.material = materialBlue;
@@ -365,6 +378,9 @@ public class GameMaster : MonoBehaviour {
             LongNoteProcesser tempLNP = tempNote.gameObject.GetComponent<LongNoteProcesser>();
             tempLNP.longNoteID = longNoteID;
             tempLNP.isReversed = isReversed;
+
+            longNoteInfoStorage[longNoteID].endHitPosition = hitPosition;
+            //longNoteInfoStorage[longNoteID].endHitTick = hitTick;
         }
 
         SpriteRenderer tempSRTimingSupport = tempNote.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>();
@@ -390,8 +406,9 @@ public class GameMaster : MonoBehaviour {
         tempNoteProcesser.isMultiNote = isMultiNote;
         tempNoteProcesser.positionNotesFrom = positionNotesFrom;
 
-        activationDataDic[lane].Add(new ActivationDatum(
-            (type == '1' || type == '2') ? appearPosition : longNoteInfoStorage[longNoteID].startAppearPosition,
+        activationDataListDic[lane].Add(new ActivationDatum(
+            hitTick,
+            type == '3' || type == '4' ? longNoteInfoStorage[longNoteID].startAppearPosition : appearPosition,
             hitPosition,
             tempNote
         ));
@@ -414,7 +431,8 @@ public class GameMaster : MonoBehaviour {
         tempLaneMoverProcesser.fromValue = fromValue;
         tempLaneMoverProcesser.toValue = toValue;
 
-        activationDataDic[lane].Add(new ActivationDatum(
+        activationDataListDic[lane].Add(new ActivationDatum(
+            hitTick,
             appearPosition,
             hitPosition,
             tempLaneMover
@@ -428,17 +446,13 @@ public class GameMaster : MonoBehaviour {
         lanesDictionary = new Dictionary<char, GameObject>();
         scoreTextData = new Dictionary<string, string>();
         timingPtsDic = new Dictionary<char, TimingPoints>();
-        activationDataDic = new Dictionary<char, List<ActivationDatum>>();
+        activationDataListDic = new Dictionary<char, List<ActivationDatum>>();
         noteNum = 0;
         laneMoverNum = 0;
         allLaneIDString = "";
 
-        string[] deleteIgnore = new string[] {
-            "Info"
-        };
-
         foreach (Transform child in gameObject.transform) {
-            if (Array.IndexOf(deleteIgnore, child.name) > -1) continue;
+            if (child.name == "Info") continue;
             GameObject.Destroy(child.gameObject);
         }
         
@@ -447,29 +461,28 @@ public class GameMaster : MonoBehaviour {
         scoreFullText = Regex.Replace(scoreFullText, @"\/\*.*\*\/", "", RegexOptions.Singleline);
         scoreFullText = Regex.Replace(scoreFullText, @"//.*?$", "", RegexOptions.Multiline);
 
-        scoreTextData["title"] = Regex.Matches(scoreFullText, @"title:(.*)")[0].Groups[1].Value;
-        scoreTextData["author"] = Regex.Matches(scoreFullText, @"author:(.*)")[0].Groups[1].Value;
-        scoreTextData["bgm"] = Regex.Matches(scoreFullText, @"bgm:(.*)")[0].Groups[1].Value;
-        scoreTextData["bgmvol"] = Regex.Matches(scoreFullText, @"bgmvol:(.*)")[0].Groups[1].Value;
-        scoreTextData["bpm"] = Regex.Matches(scoreFullText, @"bpm:(.*)")[0].Groups[1].Value;
-        scoreTextData["offset"] = Regex.Matches(scoreFullText, @"offset:(.*)")[0].Groups[1].Value;
+        scoreTextData["title"] = Regex.Matches(scoreFullText, @"title:(.*)")[0].Groups[1].Value.Trim();
+        scoreTextData["author"] = Regex.Matches(scoreFullText, @"author:(.*)")[0].Groups[1].Value.Trim();
+        scoreTextData["bgm"] = Regex.Matches(scoreFullText, @"bgm:(.*)")[0].Groups[1].Value.Trim();
+        scoreTextData["bgmvol"] = Regex.Matches(scoreFullText, @"bgmvol:(.*)")[0].Groups[1].Value.Trim();
+        scoreTextData["bpm"] = Regex.Matches(scoreFullText, @"bpm:(.*)")[0].Groups[1].Value.Trim();
+        scoreTextData["offset"] = Regex.Matches(scoreFullText, @"offset:(.*)")[0].Groups[1].Value.Trim();
 
         scoreTextData["path"] = Regex.Matches(scoreFullText, @"path:(.*?)score:", RegexOptions.Singleline)[0].Groups[1].Value;
         scoreTextData["score"] = Regex.Matches(scoreFullText, @"score:(.*)", RegexOptions.Singleline)[0].Groups[1].Value;
 
-        CreateLane('1', -120, -70, 0, 1, 1);
-        CreateLane('2', -80, -70, 0, 1, 2);
-        CreateLane('3', -40, -70, 0, 1, 3);
-        CreateLane('4', 0, -70, 0, 1, 4);
-        CreateLane('5', 40, -70, 0, 1, 5);
-        CreateLane('6', 80, -70, 0, 1, 6);
-        CreateLane('7', 120, -70, 0, 1, 7);
+        CreateLane('1', -100, -70, 0, 1, 1);
+        CreateLane('2', -60, -70, 0, 1, 2);
+        CreateLane('3', -20, -70, 0, 1, 3);
+        CreateLane('4', 20, -70, 0, 1, 4);
+        CreateLane('5', 60, -70, 0, 1, 5);
+        CreateLane('6', 100, -70, 0, 1, 6);
 
         //creating main camera
         GameObject tempGameCamera = Instantiate(gameCameraGameObject);
         timingPtsDic.Add('@', new TimingPoints(double.Parse(scoreTextData["bpm"]), 1d));
         lanesDictionary.Add('@', tempGameCamera);
-        activationDataDic.Add('@', new List<ActivationDatum>());
+        activationDataListDic.Add('@', new List<ActivationDatum>());
 
         tempGameCamera.name = "GameCamera";
         tempGameCamera.transform.parent = gameObject.transform;
@@ -503,9 +516,7 @@ public class GameMaster : MonoBehaviour {
             string[] scoreArgs = individualMatch.Groups[1].Value.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries);
             if (scoreArgs.Length > 1 && scoreArgs[1][0] == '~') {
                 string temp = allLaneIDString;
-                foreach (char lane in scoreArgs[1].Substring(1)) {
-                    temp = temp.Replace(lane.ToString(), "");
-                }
+                foreach (char lane in scoreArgs[1].Substring(1)) temp = temp.Replace(lane.ToString(), "");
                 scoreArgs[1] = temp;
             }
 
@@ -617,8 +628,11 @@ public class GameMaster : MonoBehaviour {
             );
         }
 
+        activationDataArrDic = new Dictionary<char, ActivationDatum[]>();
         foreach (var lane in allLaneIDString + '@') {
-            activationDataDic[lane].Sort((x, y) => x.appearPosition > y.appearPosition ? 1 : x.appearPosition < y.appearPosition ? -1 : 0);
+            ActivationDatum[] arrFw = activationDataListDic[lane].ToArray();
+            Array.Sort(arrFw, (x, y) => x.appearPosition > y.appearPosition ? 1 : x.appearPosition < y.appearPosition ? -1 : 0);
+            activationDataArrDic.Add(lane, arrFw);
         }
 
         InfoProcesser infoProc = transform.Find("Info").GetComponent<InfoProcesser>();
@@ -631,24 +645,33 @@ public class GameMaster : MonoBehaviour {
         infoProc.fullCombo = true;
         infoProc.allPerfect = true;
         
-        gameStartedTime = DateTime.Now.Ticks + 20000000 + (long)(float.Parse(scoreTextData["offset"]) * 10000) - (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0);
+        gameStartedTime = DateTime.Now.Ticks + 20000000 - (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0);
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
+
+        float musicTime = ((long)(float.Parse(scoreTextData["offset"]) * 10000) + (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0) - 20000000) / 10000000f;
+
+        audioSources["BGM"].clip = Resources.Load<AudioClip>($"scores/{scoreFileName}/{scoreTextData["bgm"]}");
+        audioSources["BGM"].volume = float.Parse(scoreTextData["bgmvol"]);
+        audioSources["BGM"].time = Math.Max(musicTime, 0);
+        audioSources["BGM"].PlayDelayed(Math.Max(-musicTime, 0));
     }
 
     void ActivateNotes() {
         foreach (var lane in allLaneIDString + '@') {
-            long anchorPosition = lanesDictionary[lane].GetComponent<LaneProcesser>().position;
-            foreach (var item in activationDataDic[lane]) {
+            long anchorPosition = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);
+            foreach (var item in activationDataArrDic[lane]) {
                 if (item.appearPosition < anchorPosition) {
-                    if (!item.activationTarget.activeSelf && item.hitPosition > anchorPosition) {
+                    if (item.hitPosition > anchorPosition && !item.activationTarget.activeSelf) {
                         item.activationTarget.SetActive(true);
                     }
-                }
+                } else break;
             }
         }
     }
 
     void Start() {
+        audioSources.Add("BGM", gameObject.GetComponents<AudioSource>()[0]);
+
         LoadScore(musicTitle);
     }
 
@@ -660,6 +683,7 @@ public class GameMaster : MonoBehaviour {
         foreach (char lane in allLaneIDString + '@') {
             lanesDictionary[lane].GetComponent<LaneProcesser>().position = timingPtsDic[lane].GetPositionTickByTime(gameMasterTime);
         }
+
         ActivateNotes();
     }
 }

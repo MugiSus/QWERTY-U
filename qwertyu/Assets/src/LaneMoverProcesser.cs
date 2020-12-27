@@ -50,6 +50,7 @@ public class LaneMoverProcesser : MonoBehaviour {
             }
         }
         for (int i = curve.Length - 1; i > 0; i--) time = 1 - curve[i].Evaluate(time);
+        float evaledCurve = 1 - curve[0].Evaluate(time);
 
         switch (type) {
             case "~x": case "~y": case "~z": {
@@ -59,9 +60,9 @@ public class LaneMoverProcesser : MonoBehaviour {
                 if (inProcess && inPast) parentSrcComp.uniquePosition -= additionalVector;
                 additionalVector = new Vector3(0, 0, 0);
                 switch (type[0]) {
-                    case 'x': additionalVector.x = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
-                    case 'y': additionalVector.y = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
-                    case 'z': additionalVector.z = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
+                    case 'x': additionalVector.x = fromValue + (toValue - fromValue) * evaledCurve; break;
+                    case 'y': additionalVector.y = fromValue + (toValue - fromValue) * evaledCurve; break;
+                    case 'z': additionalVector.z = fromValue + (toValue - fromValue) * evaledCurve; break;
                 }
                 if (parentSrcComp.alreadyMovedInThisFrame) transform.parent.localPosition += additionalVector;
                 else {
@@ -74,20 +75,20 @@ public class LaneMoverProcesser : MonoBehaviour {
                 if (inProcess && inPast) parentSrcComp.uniqueQuaternion *= Quaternion.Euler(additionalVector * -1);
                 additionalVector = new Vector3(0, 0, 0);
                 switch (type[1]) {
-                    case 'x': additionalVector.x = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
-                    case 'y': additionalVector.y = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
-                    case 'z': additionalVector.z = fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time)); break;
+                    case 'x': additionalVector.x = fromValue + (toValue - fromValue) * evaledCurve; break;
+                    case 'y': additionalVector.y = fromValue + (toValue - fromValue) * evaledCurve; break;
+                    case 'z': additionalVector.z = fromValue + (toValue - fromValue) * evaledCurve; break;
                 }
                 if (parentSrcComp.alreadyRotatedInThisFrame) transform.parent.rotation *= Quaternion.Euler(additionalVector);
                 else {
                     transform.parent.rotation = parentSrcComp.uniqueQuaternion * Quaternion.Euler(additionalVector);
                     parentSrcComp.alreadyRotatedInThisFrame = true;
                 }
-                if (!inProcess && inPast) parentSrcComp.uniqueQuaternion = transform.parent.rotation;
+                if (!inProcess && inPast) parentSrcComp.uniqueQuaternion *= Quaternion.Euler(additionalVector);
             } break;
             case "a": {
                 var mpb = new MaterialPropertyBlock();
-                mpb.SetColor("_Color", new Color(1, 1, 1, fromValue + (toValue - fromValue) * (1 - curve[0].Evaluate(time))));
+                mpb.SetColor("_Color", new Color(1, 1, 1, fromValue + (toValue - fromValue) * evaledCurve));
                 laneSR.SetPropertyBlock(mpb);
             } break;
         }
