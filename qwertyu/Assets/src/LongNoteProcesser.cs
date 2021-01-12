@@ -29,7 +29,7 @@ public class LongNoteProcesser : MonoBehaviour {
         tempColor.a = Math.Max(longNoteInfo.startAlpha, longNoteInfo.endAlpha);
         meshRenderer.material.color = tempColor;
 
-        longTermPosition = (longNoteInfo.startNotePosition - transform.localPosition.y) / 12.5f;
+        longTermPosition = (longNoteInfo.startNotePosition - transform.localPosition.y) / 25f;
 
         //transform.localPosition = new Vector3(0, -longTermPosition, 0);
 

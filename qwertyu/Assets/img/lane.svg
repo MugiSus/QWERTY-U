@@ -23,9 +23,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.90509668"
-     inkscape:cx="578.0938"
-     inkscape:cy="206.93152"
+     inkscape:zoom="0.80856338"
+     inkscape:cx="732.45801"
+     inkscape:cy="230.64627"
      inkscape:document-units="mm"
      inkscape:current-layer="svg8"
      showgrid="false"
@@ -36,7 +36,8 @@
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:snap-page="true"
-     inkscape:document-rotation="0" />
+     inkscape:document-rotation="0"
+     inkscape:snap-object-midpoints="true" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -45,7 +46,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,15 +64,21 @@
      inkscape:export-xdpi="131.81"
      inkscape:export-ydpi="131.81" />
   <path
-     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     style="opacity:1;fill:none;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
      d="M 300,99.999999 V 0"
      id="path1365"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
   <path
-     style="opacity:1;fill:#88eeff;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     style="opacity:1;fill:none;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
      d="M 0,0 V 99.999999"
      id="path1369"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="opacity:1;fill:none;fill-opacity:0.4;fill-rule:nonzero;stroke:#d0d0ff;stroke-width:7.50001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.25255972;paint-order:markers stroke fill"
+     d="M 150,1.05e-6 V 99.999998"
+     id="path1369-9"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
 </svg>
