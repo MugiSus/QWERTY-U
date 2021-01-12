@@ -8,6 +8,7 @@ using UnityEngine;
 public class GameMaster : MonoBehaviour {
 
     public string musicTitle = "bpm_rt";
+    public int userOffset;
     public bool debug;
 
     [SerializeField, HeaderAttribute("Game Objects")] GameObject laneGameObject;
@@ -648,7 +649,7 @@ public class GameMaster : MonoBehaviour {
         gameStartedTime = DateTime.Now.Ticks + 20000000 - (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0);
         gameMasterTime = DateTime.Now.Ticks - gameStartedTime;
 
-        float musicTime = ((long)(float.Parse(scoreTextData["offset"]) * 10000) + (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0) - 20000000) / 10000000f;
+        float musicTime = ((float.Parse(scoreTextData["offset"]) + userOffset) * 10000 + (debug ? timingPtsDic['@'].GetHitTickByBeat(startingPoint) : 0) - 20000000) / 10000000f;
 
         audioSources["BGM"].clip = Resources.Load<AudioClip>($"scores/{scoreFileName}/{scoreTextData["bgm"]}");
         audioSources["BGM"].volume = float.Parse(scoreTextData["bgmvol"]);

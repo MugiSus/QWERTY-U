@@ -3,7 +3,7 @@ author:t+pazolite
 bgm:00-04-BPM=RT
 bgmvol:0.5
 bpm:245.25
-offset:262
+offset:264
 
 path:
 
